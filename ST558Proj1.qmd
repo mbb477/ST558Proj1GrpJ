@@ -19,19 +19,20 @@ suppressPackageStartupMessages(library(tidyverse))
 ```{r}
 library(tidyverse)
 library(readr)
-census_1a <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
-head(census_1a)
+census_1a_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+head(census_1a_original)
 ```
 
 ### Select and Pivot
 
 ```{r}
-census_1a <- census_1a |>
-  select(ends_with("D"), Area_name, STCOU) |>
-  rename(area_name = Area_name)
-census_1a
-# |>
-# pivot_longer()
+census_1a_condensed <- census_1a_original |>
+  select(Area_name, STCOU, ends_with("D")) |>
+  rename(area_name = Area_name) |>
+  pivot_longer(cols = 3:12, 
+               names_to = "enrollment", 
+               values_to = "measurement")
+head(census_1a_condensed) 
 ```
 
 
