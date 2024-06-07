@@ -34,10 +34,10 @@ census_1a_condensed <- census_1a_original |>
                names_to = "education_id", 
                values_to = "measurement")
 head(census_1a_condensed) 
-view(census_1a_condensed)
+#view(census_1a_condensed)
 ```
 
-### Add year and survey codes
+### Add year and survey code columns
 
 ```{r}
 census_1a_add <- census_1a_condensed |>

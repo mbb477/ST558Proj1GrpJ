@@ -203,11 +203,11 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 5 UNITED STATES 00000 EDU010191D      41385442
 6 UNITED STATES 00000 EDU010192D      42088151</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(census_1a_condensed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#view(census_1a_condensed)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="add-year-and-survey-codes" class="level3">
-<h3 class="anchored" data-anchor-id="add-year-and-survey-codes">Add year and survey codes</h3>
+<section id="add-year-and-survey-code-columns" class="level3">
+<h3 class="anchored" data-anchor-id="add-year-and-survey-code-columns">Add year and survey code columns</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>census_1a_add <span class="ot">&lt;-</span> census_1a_condensed <span class="sc">|&gt;</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> <span class="fu">as.numeric</span>(<span class="fu">substr</span>(education_id, <span class="dv">8</span>, <span class="dv">9</span>))) <span class="sc">|&gt;</span></span>
