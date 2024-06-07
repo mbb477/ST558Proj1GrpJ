@@ -21,6 +21,7 @@ library(tidyverse)
 library(readr)
 census_1a_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 head(census_1a_original)
+#view(census_1a_original)
 ```
 
 ### Select and Pivot
@@ -30,9 +31,19 @@ census_1a_condensed <- census_1a_original |>
   select(Area_name, STCOU, ends_with("D")) |>
   rename(area_name = Area_name) |>
   pivot_longer(cols = 3:12, 
-               names_to = "enrollment", 
+               names_to = "education_id", 
                values_to = "measurement")
 head(census_1a_condensed) 
+view(census_1a_condensed)
 ```
 
+### Add year and survey codes
+
+```{r}
+census_1a_add <- census_1a_condensed |>
+  mutate(year = as.numeric(substr(education_id, 8, 9))) |>
+  mutate(year = (year + 1900)) |>
+  mutate(education_survey_code = substr(education_id, 1, 7))
+census_1a_add
+```
 
