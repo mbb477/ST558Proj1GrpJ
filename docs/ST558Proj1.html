@@ -291,7 +291,8 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> default_var_name)</span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#test function</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">process_data1</span>(census_1b_original)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>result_step_1_2 <span class="ot">&lt;-</span> <span class="fu">process_data1</span>(census_1b_original)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>result_step_1_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 31,980 × 4
    area_name     STCOU item_id    measurement
@@ -312,6 +313,31 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 </section>
 <section id="function-for-step-3" class="level2">
 <h2 class="anchored" data-anchor-id="function-for-step-3">Function for step 3</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>process_data2 <span class="ot">&lt;-</span> <span class="cf">function</span>(tibble_df) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  tibble_df <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">year =</span> (<span class="fu">as.numeric</span>(<span class="fu">substr</span>(item_id, <span class="dv">8</span>, <span class="dv">9</span>)) <span class="sc">+</span> <span class="dv">1900</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">survey_code =</span> <span class="fu">substr</span>(item_id, <span class="dv">1</span>, <span class="dv">7</span>))</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>result_step_3 <span class="ot">&lt;-</span> <span class="fu">process_data2</span>(result_step_1_2)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>result_step_3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 31,980 × 6
+   area_name     STCOU item_id    measurement  year survey_code
+   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+ 1 UNITED STATES 00000 EDU010197D    44534459  1997 EDU0101    
+ 2 UNITED STATES 00000 EDU010198D    46245814  1998 EDU0101    
+ 3 UNITED STATES 00000 EDU010199D    46368903  1999 EDU0101    
+ 4 UNITED STATES 00000 EDU010200D    46818690  1900 EDU0102    
+ 5 UNITED STATES 00000 EDU010201D    47127066  1901 EDU0102    
+ 6 UNITED STATES 00000 EDU010202D    47606570  1902 EDU0102    
+ 7 UNITED STATES 00000 EDU015203D    48506317  1903 EDU0152    
+ 8 UNITED STATES 00000 EDU015204D    48693287  1904 EDU0152    
+ 9 UNITED STATES 00000 EDU015205D    48978555  1905 EDU0152    
+10 UNITED STATES 00000 EDU015206D    49140702  1906 EDU0152    
+# ℹ 31,970 more rows</code></pre>
+</div>
+</div>
 
 
 </section>

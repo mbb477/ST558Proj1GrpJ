@@ -82,13 +82,20 @@ process_data1 <- function(tibble_df, default_var_name = "measurement") {
                  values_to = default_var_name)
 }
 #test function
-process_data1(census_1b_original)
+result_step_1_2 <- process_data1(census_1b_original)
+result_step_1_2
 ```
 
 ## Function for step 3
 
 ```{r}
-
+process_data2 <- function(tibble_df) {
+  tibble_df |>
+    mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
+           survey_code = substr(item_id, 1, 7))
+}
+result_step_3 <- process_data2(result_step_1_2)
+result_step_3
 ```
 
 
