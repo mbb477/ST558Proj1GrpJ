@@ -33,7 +33,6 @@ census_1a_condensed <- census_1a_original |>
                names_to = "item_id", 
                values_to = "measurement")
 head(census_1a_condensed) 
-census_1a_condensed
 #view(census_1a_condensed)
 ```
 
