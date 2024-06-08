@@ -58,6 +58,8 @@ noncounty_data <- census_1a_add |>
 class(county_data) <- c("county", class(county_data))
 class(noncounty_data) <- c("state", 
                            class(noncounty_data))
+head(county_data)
+head(noncounty_data)
 ```
 
 ### Add new variable for county level tibble indicating which state the county is located in
@@ -106,7 +108,7 @@ result_step_3
 
 ## Function for step 6
 
-##Function for step 4
+## Function for step 4
 
 ## Final data processing wrapper function
 
