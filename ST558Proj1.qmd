@@ -62,12 +62,6 @@ class(noncounty_data) <- c("state",
 
 ### Add new variable for county level tibble indicating which state the county is located in
 
-```{r}
-
-
-```
-
-
 ### Add new variable for non-county level tibble
 
 # Data processing function creation
