@@ -31,7 +31,7 @@ census_1a_condensed <- census_1a_original |>
   select(Area_name, STCOU, ends_with("D")) |>
   rename(area_name = Area_name) |>
   pivot_longer(cols = 3:12, 
-               names_to = "education_id", 
+               names_to = "item_id", 
                values_to = "measurement")
 head(census_1a_condensed) 
 #view(census_1a_condensed)
@@ -41,8 +41,8 @@ head(census_1a_condensed)
 
 ```{r}
 census_1a_add <- census_1a_condensed |>
-  mutate(year = (as.numeric(substr(education_id, 8, 9)) + 1900),
-         education_survey_code = substr(education_id, 1, 7))
+  mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
+         survey_code = substr(item_id, 1, 7))
 census_1a_add
 ```
 
@@ -63,16 +63,16 @@ census_1a_add
 # Data processing function creation
 
 ```{r}
-#need to make more generic (pivot column name) and add optional argument, maybe 
-# need to have a named tibble that can be returned so it can be used later?
+#need to add optional argument
 process_data1 <- function(tibble_df) {
   tibble_df |>
     select(Area_name, STCOU, ends_with("D")) |>
     rename(area_name = Area_name) |>
     pivot_longer(cols = 3:12, 
-                 names_to = "education_id", 
+                 names_to = "item_id", 
                  values_to = "measurement")
 }
+#test function
 process_data1(census_1a_original)
 ```
 

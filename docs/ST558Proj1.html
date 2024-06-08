@@ -189,19 +189,19 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Area_name, STCOU, <span class="fu">ends_with</span>(<span class="st">"D"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">area_name =</span> Area_name) <span class="sc">|&gt;</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"education_id"</span>, </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"item_id"</span>, </span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"measurement"</span>)</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(census_1a_condensed) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
-  area_name     STCOU education_id measurement
-  &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;
-1 UNITED STATES 00000 EDU010187D      40024299
-2 UNITED STATES 00000 EDU010188D      39967624
-3 UNITED STATES 00000 EDU010189D      40317775
-4 UNITED STATES 00000 EDU010190D      40737600
-5 UNITED STATES 00000 EDU010191D      41385442
-6 UNITED STATES 00000 EDU010192D      42088151</code></pre>
+  area_name     STCOU item_id    measurement
+  &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt;
+1 UNITED STATES 00000 EDU010187D    40024299
+2 UNITED STATES 00000 EDU010188D    39967624
+3 UNITED STATES 00000 EDU010189D    40317775
+4 UNITED STATES 00000 EDU010190D    40737600
+5 UNITED STATES 00000 EDU010191D    41385442
+6 UNITED STATES 00000 EDU010192D    42088151</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#view(census_1a_condensed)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -210,23 +210,23 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <h3 class="anchored" data-anchor-id="add-year-and-survey-code-columns">Add year and survey code columns</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>census_1a_add <span class="ot">&lt;-</span> census_1a_condensed <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> (<span class="fu">as.numeric</span>(<span class="fu">substr</span>(education_id, <span class="dv">8</span>, <span class="dv">9</span>)) <span class="sc">+</span> <span class="dv">1900</span>),</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">education_survey_code =</span> <span class="fu">substr</span>(education_id, <span class="dv">1</span>, <span class="dv">7</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> (<span class="fu">as.numeric</span>(<span class="fu">substr</span>(item_id, <span class="dv">8</span>, <span class="dv">9</span>)) <span class="sc">+</span> <span class="dv">1900</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">survey_code =</span> <span class="fu">substr</span>(item_id, <span class="dv">1</span>, <span class="dv">7</span>))</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>census_1a_add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 31,980 × 6
-   area_name     STCOU education_id measurement  year education_survey_code
-   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                
- 1 UNITED STATES 00000 EDU010187D      40024299  1987 EDU0101              
- 2 UNITED STATES 00000 EDU010188D      39967624  1988 EDU0101              
- 3 UNITED STATES 00000 EDU010189D      40317775  1989 EDU0101              
- 4 UNITED STATES 00000 EDU010190D      40737600  1990 EDU0101              
- 5 UNITED STATES 00000 EDU010191D      41385442  1991 EDU0101              
- 6 UNITED STATES 00000 EDU010192D      42088151  1992 EDU0101              
- 7 UNITED STATES 00000 EDU010193D      42724710  1993 EDU0101              
- 8 UNITED STATES 00000 EDU010194D      43369917  1994 EDU0101              
- 9 UNITED STATES 00000 EDU010195D      43993459  1995 EDU0101              
-10 UNITED STATES 00000 EDU010196D      44715737  1996 EDU0101              
+   area_name     STCOU item_id    measurement  year survey_code
+   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+ 1 UNITED STATES 00000 EDU010187D    40024299  1987 EDU0101    
+ 2 UNITED STATES 00000 EDU010188D    39967624  1988 EDU0101    
+ 3 UNITED STATES 00000 EDU010189D    40317775  1989 EDU0101    
+ 4 UNITED STATES 00000 EDU010190D    40737600  1990 EDU0101    
+ 5 UNITED STATES 00000 EDU010191D    41385442  1991 EDU0101    
+ 6 UNITED STATES 00000 EDU010192D    42088151  1992 EDU0101    
+ 7 UNITED STATES 00000 EDU010193D    42724710  1993 EDU0101    
+ 8 UNITED STATES 00000 EDU010194D    43369917  1994 EDU0101    
+ 9 UNITED STATES 00000 EDU010195D    43993459  1995 EDU0101    
+10 UNITED STATES 00000 EDU010196D    44715737  1996 EDU0101    
 # ℹ 31,970 more rows</code></pre>
 </div>
 </div>
@@ -245,31 +245,31 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <section id="data-processing-function-creation" class="level1">
 <h1>Data processing function creation</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#need to make more generic (pivot column name) and add optional argument, maybe </span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># need to have a named tibble that can be returned so it can be used later?</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>process_data1 <span class="ot">&lt;-</span> <span class="cf">function</span>(tibble_df) {</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  tibble_df <span class="sc">|&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(Area_name, STCOU, <span class="fu">ends_with</span>(<span class="st">"D"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">area_name =</span> Area_name) <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>, </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"education_id"</span>, </span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"measurement"</span>)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#need to add optional argument</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>process_data1 <span class="ot">&lt;-</span> <span class="cf">function</span>(tibble_df) {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  tibble_df <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(Area_name, STCOU, <span class="fu">ends_with</span>(<span class="st">"D"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">area_name =</span> Area_name) <span class="sc">|&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>, </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"item_id"</span>, </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"measurement"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#test function</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">process_data1</span>(census_1a_original)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 31,980 × 4
-   area_name     STCOU education_id measurement
-   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;
- 1 UNITED STATES 00000 EDU010187D      40024299
- 2 UNITED STATES 00000 EDU010188D      39967624
- 3 UNITED STATES 00000 EDU010189D      40317775
- 4 UNITED STATES 00000 EDU010190D      40737600
- 5 UNITED STATES 00000 EDU010191D      41385442
- 6 UNITED STATES 00000 EDU010192D      42088151
- 7 UNITED STATES 00000 EDU010193D      42724710
- 8 UNITED STATES 00000 EDU010194D      43369917
- 9 UNITED STATES 00000 EDU010195D      43993459
-10 UNITED STATES 00000 EDU010196D      44715737
+   area_name     STCOU item_id    measurement
+   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt;
+ 1 UNITED STATES 00000 EDU010187D    40024299
+ 2 UNITED STATES 00000 EDU010188D    39967624
+ 3 UNITED STATES 00000 EDU010189D    40317775
+ 4 UNITED STATES 00000 EDU010190D    40737600
+ 5 UNITED STATES 00000 EDU010191D    41385442
+ 6 UNITED STATES 00000 EDU010192D    42088151
+ 7 UNITED STATES 00000 EDU010193D    42724710
+ 8 UNITED STATES 00000 EDU010194D    43369917
+ 9 UNITED STATES 00000 EDU010195D    43993459
+10 UNITED STATES 00000 EDU010196D    44715737
 # ℹ 31,970 more rows</code></pre>
 </div>
 </div>
