@@ -99,3 +99,21 @@ result_step_3
 ```
 
 
+## Function for step 5
+
+## Function for step 6
+
+##Function for step 4
+
+## Final data processing wrapper function
+
+```{r}
+data_processing_wrapper <- function(url, default_var_name = "measurement") {
+  result <- read_csv(url) |>
+    process_data1() |>
+    process_data2()
+  return(result)
+}
+data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+```
+
