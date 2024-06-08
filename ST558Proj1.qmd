@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-# Data processing
+# Data processing first steps
 
 ## Data set EDU01a
 
@@ -45,5 +45,36 @@ census_1a_add <- census_1a_condensed |>
          education_survey_code = substr(education_id, 1, 7))
 census_1a_add
 ```
+
+### Create two datasets with non-county and county level data
+
+
+
+### Add new variable for county level tibble
+
+
+
+
+### Add new variable for non-county level tibble
+
+
+
+
+# Data processing function creation
+
+```{r}
+#need to make more generic (pivot column name) and add optional argument, maybe 
+# need to have a named tibble that can be returned so it can be used later?
+process_data1 <- function(tibble_df) {
+  tibble_df |>
+    select(Area_name, STCOU, ends_with("D")) |>
+    rename(area_name = Area_name) |>
+    pivot_longer(cols = 3:12, 
+                 names_to = "education_id", 
+                 values_to = "measurement")
+}
+process_data1(census_1a_original)
+```
+
 
 

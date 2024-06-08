@@ -140,8 +140,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="data-processing" class="level1">
-<h1>Data processing</h1>
+<section id="data-processing-first-steps" class="level1">
+<h1>Data processing first steps</h1>
 <section id="data-set-edu01a" class="level2">
 <h2 class="anchored" data-anchor-id="data-set-edu01a">Data set EDU01a</h2>
 <section id="import-the-data" class="level3">
@@ -230,10 +230,51 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 # ℹ 31,970 more rows</code></pre>
 </div>
 </div>
-
-
+</section>
+<section id="create-two-datasets-with-non-county-and-county-level-data" class="level3">
+<h3 class="anchored" data-anchor-id="create-two-datasets-with-non-county-and-county-level-data">Create two datasets with non-county and county level data</h3>
+</section>
+<section id="add-new-variable-for-county-level-tibble" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-variable-for-county-level-tibble">Add new variable for county level tibble</h3>
+</section>
+<section id="add-new-variable-for-non-county-level-tibble" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-variable-for-non-county-level-tibble">Add new variable for non-county level tibble</h3>
 </section>
 </section>
+</section>
+<section id="data-processing-function-creation" class="level1">
+<h1>Data processing function creation</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#need to make more generic (pivot column name) and add optional argument, maybe </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># need to have a named tibble that can be returned so it can be used later?</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>process_data1 <span class="ot">&lt;-</span> <span class="cf">function</span>(tibble_df) {</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  tibble_df <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(Area_name, STCOU, <span class="fu">ends_with</span>(<span class="st">"D"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">area_name =</span> Area_name) <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>, </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"education_id"</span>, </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"measurement"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">process_data1</span>(census_1a_original)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 31,980 × 4
+   area_name     STCOU education_id measurement
+   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;              &lt;dbl&gt;
+ 1 UNITED STATES 00000 EDU010187D      40024299
+ 2 UNITED STATES 00000 EDU010188D      39967624
+ 3 UNITED STATES 00000 EDU010189D      40317775
+ 4 UNITED STATES 00000 EDU010190D      40737600
+ 5 UNITED STATES 00000 EDU010191D      41385442
+ 6 UNITED STATES 00000 EDU010192D      42088151
+ 7 UNITED STATES 00000 EDU010193D      42724710
+ 8 UNITED STATES 00000 EDU010194D      43369917
+ 9 UNITED STATES 00000 EDU010195D      43993459
+10 UNITED STATES 00000 EDU010196D      44715737
+# ℹ 31,970 more rows</code></pre>
+</div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
