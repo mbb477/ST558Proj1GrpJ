@@ -62,19 +62,25 @@ census_1a_add
 
 # Data processing function creation
 
+## Function for steps 1 and 2
+
 ```{r}
-#need to add optional argument
-process_data1 <- function(tibble_df) {
+process_data1 <- function(tibble_df, default_var_name = "measurement") {
   tibble_df |>
     select(Area_name, STCOU, ends_with("D")) |>
     rename(area_name = Area_name) |>
     pivot_longer(cols = 3:12, 
                  names_to = "item_id", 
-                 values_to = "measurement")
+                 values_to = default_var_name)
 }
 #test function
 process_data1(census_1a_original)
 ```
 
+## Function for step 3
+
+```{r}
+
+```
 
 
