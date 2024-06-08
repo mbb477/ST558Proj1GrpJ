@@ -15,7 +15,6 @@ editor: visual
 suppressPackageStartupMessages(library(tidyverse))
 ```
 
-
 ```{r}
 library(tidyverse)
 library(readr)
@@ -34,6 +33,7 @@ census_1a_condensed <- census_1a_original |>
                names_to = "item_id", 
                values_to = "measurement")
 head(census_1a_condensed) 
+census_1a_condensed
 #view(census_1a_condensed)
 ```
 
@@ -46,19 +46,29 @@ census_1a_add <- census_1a_condensed |>
 census_1a_add
 ```
 
-### Create two datasets with non-county and county level data
+### Create two datasets with non-county and county level data, with new class added to each
+
+```{r}
+county_data <- census_1a_add |>
+  filter(grepl(pattern = ", \\w\\w", area_name))
+
+noncounty_data <- census_1a_add |>
+  filter(!grepl(pattern = ", \\w\\w", area_name))
+
+class(county_data) <- c("county", class(county_data))
+class(noncounty_data) <- c("state", 
+                           class(noncounty_data))
+```
+
+### Add new variable for county level tibble indicating which state the county is located in
+
+```{r}
 
 
-
-### Add new variable for county level tibble
-
-
+```
 
 
 ### Add new variable for non-county level tibble
-
-
-
 
 # Data processing function creation
 
@@ -68,7 +78,6 @@ census_1a_add
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 head(census_1b_original)
 ```
-
 
 ## Function for steps 1 and 2
 
