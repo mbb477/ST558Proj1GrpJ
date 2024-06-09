@@ -84,9 +84,10 @@ noncounty_data <- noncounty_data |>
           "IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA",
           "NORTH DAKOTA", "SOUTH DAKOTA"), "West North Central",
           ifelse(area_name %in% c(
-            "DELEWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
+            "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
             "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA",
-            "WASHINGTON DC", "WEST VIRGINIA"), "South Atlantic",
+            "DISTRICT OF COLUMBIA", "District of Columbia", "WEST VIRGINIA"), 
+            "South Atlantic",
             ifelse(area_name %in% c(
               "ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE"),
               "East South Central",
@@ -100,7 +101,9 @@ noncounty_data <- noncounty_data |>
                   ifelse(area_name %in% c(
                     "ALASKA", "CALIFORNIA", "HAWAII", "OREGON",
                     "WASHINGTON"), "Pacific", 
-                    "ERROR"))))))))))
+                  "ERROR"))))))))))
+noncounty_data
+view(noncounty_data)
 ```
 
 
