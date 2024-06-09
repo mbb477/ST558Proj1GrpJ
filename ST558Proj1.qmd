@@ -23,7 +23,7 @@ head(census_1a_original)
 #view(census_1a_original)
 ```
 
-### Select and Pivot
+### Steps 1 and 2: Select and Pivot
 
 ```{r}
 census_1a_condensed <- census_1a_original |>
@@ -36,7 +36,7 @@ head(census_1a_condensed)
 #view(census_1a_condensed)
 ```
 
-### Add year and survey code columns
+### Step 3: Add year and survey code columns
 
 ```{r}
 census_1a_add <- census_1a_condensed |>
@@ -45,7 +45,7 @@ census_1a_add <- census_1a_condensed |>
 census_1a_add
 ```
 
-### Create two datasets with non-county and county level data, with new class added to each
+### Step 4: Create two datasets with non-county and county level data, with new class added to each
 
 ```{r}
 county_data <- census_1a_add |>
@@ -55,30 +55,67 @@ noncounty_data <- census_1a_add |>
   filter(!grepl(pattern = ", \\w\\w", area_name))
 
 class(county_data) <- c("county", class(county_data))
-class(noncounty_data) <- c("state", 
-                           class(noncounty_data))
+class(noncounty_data) <- c("state", class(noncounty_data))
+
+head(county_data)
+head(noncounty_data)
 ```
 
-### Add new variable for county level tibble indicating which state the county is located in
-
+### Step 5: Add new variable for county level tibble indicating which state the county is located in
 ```{r}
-
-
+county_data <- county_data |>
+  mutate(state = substr(area_name, nchar(area_name)-1,
+                        nchar(area_name)))
 ```
 
+### Step 6: Add new variable for non-county level tibble indicating which U.S. division where the state is located
+```{r}
+noncounty_data <- noncounty_data |>
+  mutate(division = ifelse(area_name %in% c(
+    "CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", 
+    "RHODE ISLAND", "VERMONT"), "New England",
+    ifelse(area_name %in% c(
+      "NEW JERSEY", "NEW YORK", "PENNSYLVANIA"), 
+      "Middle Atlantic", 
+      ifelse(area_name %in% c(
+        "ILLINOIS", "INDIANA", "MICHIGAN", "OHIO", "WISCONSIN"),
+        "East North Central", 
+        ifelse(area_name %in% c(
+          "IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA",
+          "NORTH DAKOTA", "SOUTH DAKOTA"), "West North Central",
+          ifelse(area_name %in% c(
+            "DELEWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
+            "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA",
+            "WASHINGTON DC", "WEST VIRGINIA"), "South Atlantic",
+            ifelse(area_name %in% c(
+              "ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE"),
+              "East South Central",
+              ifelse(area_name %in% c(
+                "ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS"),
+                "West South Central",
+                ifelse(area_name %in% c(
+                  "ARIZONA", "COLORADO", "IDAHO", "MONTANA",
+                  "NEVADA", "NEW MEXICO", "UTAH", "WYOMING"),
+                  "Mountain",
+                  ifelse(area_name %in% c(
+                    "ALASKA", "CALIFORNIA", "HAWAII", "OREGON",
+                    "WASHINGTON"), "Pacific", 
+                    "ERROR"))))))))))
+```
 
-### Add new variable for non-county level tibble
 
 # Data processing function creation
 
-## Import data set EDU01b
+## Data Set EDU01b
+
+### Import the data
 
 ```{r}
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 head(census_1b_original)
 ```
 
-## Function for steps 1 and 2
+### Function for steps 1 and 2
 
 ```{r}
 process_data1 <- function(tibble_df, default_var_name = "measurement") {
@@ -94,7 +131,7 @@ result_step_1_2 <- process_data1(census_1b_original)
 result_step_1_2
 ```
 
-## Function for step 3
+### Function for step 3
 
 ```{r}
 process_data2 <- function(tibble_df) {
@@ -105,3 +142,23 @@ process_data2 <- function(tibble_df) {
 result_step_3 <- process_data2(result_step_1_2)
 result_step_3
 ```
+
+
+### Function for step 5
+
+### Function for step 6
+
+### Function for step 4
+
+## Final data processing wrapper function
+
+```{r}
+data_processing_wrapper <- function(url, default_var_name = "measurement") {
+  result <- read_csv(url) |>
+    process_data1() |>
+    process_data2()
+  return(result)
+}
+data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+```
+
