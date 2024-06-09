@@ -9,7 +9,11 @@ editor: visual
 
 ## Data set EDU01a
 
+We begin with data set EDU01a, which contains measurements from different areas of the country taken across different years. In the steps below, we create code to organize the data into a usable form.
+
 ### Import the Data
+
+Before we, we load relevant packages and read in the csv file storing the data.
 
 ```{r, echo=FALSE}
 suppressPackageStartupMessages(library(tidyverse))
@@ -25,6 +29,8 @@ head(census_1a_original)
 
 ### Steps 1 and 2: Select and Pivot
 
+In the next two steps, we select a subset of columns we would like to work with, and then restructure the data from wide to long format, so that repeated measurements of the same area are contained in additional rows. 
+
 ```{r}
 census_1a_condensed <- census_1a_original |>
   select(Area_name, STCOU, ends_with("D")) |>
@@ -38,6 +44,8 @@ head(census_1a_condensed)
 
 ### Step 3: Add year and survey code columns
 
+Next, we parse the character strings stored in the item_id column to extract the year of measurement and survey code, storing these as new variables. 
+
 ```{r}
 census_1a_add <- census_1a_condensed |>
   mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
@@ -45,7 +53,9 @@ census_1a_add <- census_1a_condensed |>
 census_1a_add
 ```
 
-### Step 4: Create two datasets with non-county and county level data, with new class added to each
+### Step 4: Create two datasets 
+
+In this step, we separate the observations into two separate datasets based on the presence or absence of a character string pattern in the area_name variable, which is indicative of county level or non-county level data, respectively. From here, we also assign a "county" or "noncounty" class to each new dataset. 
 
 ```{r}
 county_data <- census_1a_add |>
@@ -61,14 +71,20 @@ head(county_data)
 head(noncounty_data)
 ```
 
-### Step 5: Add new variable for county level tibble indicating which state the county is located in
+### Step 5: Add new variable for county level tibble 
+
+Within the county dataset, we now extract the last two characters of the area_name variable, indicating which state the county is located in, and we store this in a new "state" variable. 
+
 ```{r}
 county_data <- county_data |>
   mutate(state = substr(area_name, nchar(area_name)-1,
                         nchar(area_name)))
 ```
 
-### Step 6: Add new variable for non-county level tibble indicating which U.S. division where the state is located
+### Step 6: Add new variable for non-county level tibble 
+
+For the non-county dataset, we use a series of ifelse statements to indicate the set of states belonging to each U.S. division, creating a new "division" variable to store this information. When the area in question is not a state (e.g., UNITED STATES), this will return "ERROR". 
+
 ```{r}
 noncounty_data <- noncounty_data |>
   mutate(division = ifelse(area_name %in% c(
@@ -86,8 +102,8 @@ noncounty_data <- noncounty_data |>
           ifelse(area_name %in% c(
             "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
             "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA",
-            "DISTRICT OF COLUMBIA", "District of Columbia", "WEST VIRGINIA"), 
-            "South Atlantic",
+            "DISTRICT OF COLUMBIA", "District of Columbia", 
+            "WEST VIRGINIA"), "South Atlantic",
             ifelse(area_name %in% c(
               "ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE"),
               "East South Central",
@@ -106,12 +122,15 @@ noncounty_data
 view(noncounty_data)
 ```
 
-
 # Data processing function creation
 
 ## Data Set EDU01b
 
+We now turn to a second data set EDU01b, which contains data structured similarly to EDU01a, with measurements from areas of the country taken across different years. In the steps below, we will recreate the steps above for this new data, but rather than simply copying code and modifying to apply to this one new data set, we will create functions that can apply the same set of steps to any similar data set. 
+
 ### Import the data
+
+To begin, we import the new data set we will be working with. 
 
 ```{r}
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
@@ -119,6 +138,8 @@ head(census_1b_original)
 ```
 
 ### Function for steps 1 and 2
+
+Below we create a function called process_data1, which takes in the raw census data set, selects designated columns, and pivots to long format. Arguments for the function are the name of the raw data tibble and, optionally, the desired name of the column to store the measurement for each observation (default = "measurement"). 
 
 ```{r}
 process_data1 <- function(tibble_df, default_var_name = "measurement") {
@@ -136,6 +157,8 @@ result_step_1_2
 
 ### Function for step 3
 
+Here, we create a second function, process_data2, which performs step 3 from above to create year and survey code variables. The only argument is the name of the modified census tibble output from the previous step. 
+
 ```{r}
 process_data2 <- function(tibble_df) {
   tibble_df |>
@@ -145,13 +168,93 @@ process_data2 <- function(tibble_df) {
 result_step_3 <- process_data2(result_step_1_2)
 result_step_3
 ```
+```{r}
+#Maggie's attempt to convert 00 codes and above to 2000+ (assuming that's what they mean). May not work, didn't want to mess up original code. Using 0 as a test to see if there are years that get missed, but didn't actually check this yet.  
 
+process_data2 <- function(census_df2=result_step_1_2) {
+  census_df2 |>
+    mutate(year = ifelse(substr(item_id, 7, 7)=="1", 
+     (as.numeric(substr(item_id, 8, 9)) + 1900), 
+     ifelse(substr(item_id, 7, 7)=="2", 
+       (as.numeric(substr(item_id, 8, 9)) + 2000), 0)), 
+      survey_code = substr(item_id, 1, 7))
+}
+```
 
 ### Function for step 5
 
+Next, we create a function to perform step 5, which will taken the output from the previous step, extract the last two characters of the area_name variable and stores this in a new "state" variable. Again, the only argument is the name of the census data tibble output from the previous step.
+
+```{r}
+add_state <- function(census_df) {
+  census_df |>
+    mutate(state = substr(area_name, nchar(area_name)-1,
+                        nchar(area_name)))
+}
+```
+
 ### Function for step 6
 
+Next, we create a function to assign each state to its corresponding division in the United States. Given that the data set has not yet been split between county and non-county data, this function should return "ERROR" for the majority of observations which correspond to county-level data. 
+
+```{r}
+add_division <- function(census_df) {
+  census_df |>
+    mutate(division = ifelse(area_name %in% c(
+      "CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", 
+      "RHODE ISLAND", "VERMONT"), "New England",
+      ifelse(area_name %in% c(
+        "NEW JERSEY", "NEW YORK", "PENNSYLVANIA"),
+        "Middle Atlantic",
+        ifelse(area_name %in% c(
+          "ILLINOIS", "INDIANA", "MICHIGAN", "OHIO", "WISCONSIN"),
+          "East North Central",
+          ifelse(area_name %in% c(
+            "IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA",
+            "NORTH DAKOTA", "SOUTH DAKOTA"), "West North Central",
+            ifelse(area_name %in% c(
+              "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
+              "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", 
+              "DISTRICT OF COLUMBIA", "District of Columbia", 
+              "WEST VIRGINIA"), "South Atlantic", 
+              ifelse(area_name %in% c(
+                "ALABAMA", "KENTUCKY", "MISSISSIPPI",
+                "TENNESSEE"), "East South Central", 
+                ifelse(area_name %in% c(
+                  "ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS"),
+                  "West South Central",
+                  ifelse(area_name %in% c(
+                    "ARIZONA", "COLORADO", "IDAHO", "MONTANA",
+                    "NEVADA", "NEW MEXICO", "UTAH", "WYOMING"),
+                    "Mountain", 
+                    ifelse(area_name %in% c(
+                      "ALASKA", "CALIFORNIA", "HAWAII", "OREGON", 
+                      "WASHINGTON"), "Pacific", "ERROR"))))))))))
+}
+```
+
 ### Function for step 4
+
+Here, we create a function that will split the data into two datasets (one for county-level data, and one for non-county data), and then calls the above two functions to add the new variable to each new tibble. 
+
+```{r}
+split_data <- function(census_df) {
+  county_data <- census_df |>
+    filter(grepl(pattern = ", \\w\\w", area_name)) 
+  class(county_data) <- c("county", class(county_data)) 
+  county_data <- add_state(county_data)
+  
+  noncounty_data <- census_df |>
+    filter(!grepl(pattern = ", \\w\\w", area_name)) 
+  class(noncounty_data) <- c("state", class(noncounty_data)) 
+  add_division(noncounty_data)
+}
+#test function
+split_data(result_step_3)
+
+```
+
+
 
 ## Final data processing wrapper function
 
@@ -164,4 +267,3 @@ data_processing_wrapper <- function(url, default_var_name = "measurement") {
 }
 data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
-
