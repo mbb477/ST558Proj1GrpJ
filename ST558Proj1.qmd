@@ -7,9 +7,9 @@ editor: visual
 
 # Data processing first steps
 
-## Data set EDU01a
+One of the goals of this project is to create a function that can take in a URL and process and parse similar types of data sets in a specific way. The data sets we are working with are files that contain Census Bureau information.
 
-### Import the Data
+We will start with the EDU01a data set and use it to outline the steps that will be necessary to create our wrapper function. To begin, the appropriate packages are loaded and the data imported using read_csv. This function is appropriate for csv files. The data already contains column names, which is the default for this function, so it is not necessary to specify an argument regarding column names.
 
 ```{r, echo=FALSE}
 suppressPackageStartupMessages(library(tidyverse))
@@ -20,10 +20,9 @@ library(tidyverse)
 library(readr)
 census_1a_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 head(census_1a_original)
-#view(census_1a_original)
 ```
 
-### Steps 1 and 2: Select and Pivot
+The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.
 
 ```{r}
 census_1a_condensed <- census_1a_original |>
@@ -31,12 +30,11 @@ census_1a_condensed <- census_1a_original |>
   rename(area_name = Area_name) |>
   pivot_longer(cols = 3:12, 
                names_to = "item_id", 
-               values_to = "measurement")
-head(census_1a_condensed) 
-#view(census_1a_condensed)
+               values_to = "enrollment")
+head(census_1a_condensed)
 ```
 
-### Step 3: Add year and survey code columns
+Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in it's own column. We also want to isolate and put in it's own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.
 
 ```{r}
 census_1a_add <- census_1a_condensed |>
@@ -62,6 +60,7 @@ head(noncounty_data)
 ```
 
 ### Step 5: Add new variable for county level tibble indicating which state the county is located in
+
 ```{r}
 county_data <- county_data |>
   mutate(state = substr(area_name, nchar(area_name)-1,
@@ -69,6 +68,7 @@ county_data <- county_data |>
 ```
 
 ### Step 6: Add new variable for non-county level tibble indicating which U.S. division where the state is located
+
 ```{r}
 noncounty_data <- noncounty_data |>
   mutate(division = ifelse(area_name %in% c(
@@ -103,25 +103,22 @@ noncounty_data <- noncounty_data |>
                     "WASHINGTON"), "Pacific", 
                   "ERROR"))))))))))
 noncounty_data
-view(noncounty_data)
+#view(noncounty_data)
 ```
-
 
 # Data processing function creation
 
-## Data Set EDU01b
-
-### Import the data
+In this section we are going to use what we generated in the first section to create a data processing function, but will instead use our second data set, EDU01b, to do so. The first step is the same for importing, although we will incorporate this step into our final wrapper function.
 
 ```{r}
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 head(census_1b_original)
 ```
 
-### Function for steps 1 and 2
+Creating the first part of the function is fairly simple and includes the steps of selecting our columns, renaming and pivoting. Our arguments for the function are our tibble we imported and a default variable name which can be changed as appropriate for the data set. Testing the function produces a similar result as obtained with the first data set.
 
 ```{r}
-process_data1 <- function(tibble_df, default_var_name = "measurement") {
+process_data1 <- function(tibble_df, default_var_name = "enrollment") {
   tibble_df |>
     select(Area_name, STCOU, ends_with("D")) |>
     rename(area_name = Area_name) |>
@@ -134,7 +131,7 @@ result_step_1_2 <- process_data1(census_1b_original)
 result_step_1_2
 ```
 
-### Function for step 3
+The next part of the function incorporates the addition of our two extra columns. In this case, we also take in our tibble, but don't need to specify the default variable since it was specified in the previous function. Testing the function returned the expected tibble.
 
 ```{r}
 process_data2 <- function(tibble_df) {
@@ -142,10 +139,10 @@ process_data2 <- function(tibble_df) {
     mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
            survey_code = substr(item_id, 1, 7))
 }
+#test the function
 result_step_3 <- process_data2(result_step_1_2)
 result_step_3
 ```
-
 
 ### Function for step 5
 
@@ -164,4 +161,3 @@ data_processing_wrapper <- function(url, default_var_name = "measurement") {
 }
 data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
-
