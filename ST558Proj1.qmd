@@ -1,6 +1,7 @@
 ---
 title: "ST558 Project 1"
 author: "M. Sweitzer, M. Beebe"
+date: "`r Sys.Date()`"
 format: html
 editor: visual
 ---
@@ -20,7 +21,8 @@ suppressPackageStartupMessages(library(tidyverse))
 ```{r}
 library(tidyverse)
 library(readr)
-census_1a_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+census_1a_original <- 
+read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 head(census_1a_original)
 ```
 
@@ -52,7 +54,7 @@ census_1a_add
 
 ### Step 4: Create Two Data Sets
 
-In this step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable, which is indicative of county level or non-county level data, respectively. From here, we also assign a "county" or "non-county" class to each new data set.
+In this next step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable. Specifically, we use the grepl() function to identify observations within the area_name column that contain the pattern of a comma followed by a space and then two consecutive characters, which is indicative of county level data. First, we use the filter() function to select only those rows that contain the pattern and store these in the county_data tibble. then we use filter() to select only those rows that do NOT contain the pattern, and store those in the noncounty_data tibble. From here, we also assign a "county" or "non-county" class to each new data set.
 
 ```{r}
 county_data <- census_1a_add |>
@@ -70,7 +72,7 @@ head(noncounty_data)
 
 ### Step 5: Add New Variable for County Data
 
-Within the county data set, we now extract the last two characters of the area_name variable, indicating which state the county is located in, and we store this in a new "state" variable.
+Within the county data set, we now return to using substr() to extract the last two characters of the area_name variable, which indicates the two-letter abbreviation for which state in which the county is located. We store this in a new "state" variable.
 
 ```{r}
 county_data <- county_data |>
@@ -100,7 +102,8 @@ noncounty_data <- noncounty_data |>
           ifelse(area_name %in% c(
             "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
             "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA",
-            "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), "South Atlantic",
+            "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), 
+            "South Atlantic",
             ifelse(area_name %in% c(
               "ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE"),
               "East South Central",
@@ -136,7 +139,7 @@ head(census_1b_original)
 Creating the first part of the function is fairly simple and includes the steps of selecting our columns, renaming and pivoting. Our arguments for the function are our tibble we imported and a default variable name which can be changed as appropriate for the data set. Testing the function produces a similar result as obtained with the first data set.
 
 ```{r}
-process_data1 <- function(census_df, default_var_name = "enrollment") {
+select_pivot <- function(census_df, default_var_name = "enrollment") {
   census_df |>
     select(Area_name, STCOU, ends_with("D")) |>
     rename(area_name = Area_name) |>
@@ -145,7 +148,7 @@ process_data1 <- function(census_df, default_var_name = "enrollment") {
                  values_to = default_var_name)
 }
 #test function
-result_step_1_2 <- process_data1(census_1b_original)
+result_step_1_2 <- select_pivot(census_1b_original)
 result_step_1_2
 ```
 
@@ -153,9 +156,8 @@ result_step_1_2
 
 The next part of the function incorporates the addition of our two extra columns. In this case, we also take in our tibble, but don't need to specify the default variable since it was specified in the previous function. Testing the function returned the expected tibble.
 
-
 ```{r}
-process_data2 <- function(census_df) {
+add_year_survey_code <- function(census_df) {
   census_df |> 
     mutate(year = ifelse(substr(item_id, 7, 7)=="1", 
      (as.numeric(substr(item_id, 8, 9)) + 1900), 
@@ -165,14 +167,15 @@ process_data2 <- function(census_df) {
 }
 
 #test the function
-result_step_3 <- process_data2(result_step_1_2)
+result_step_3 <- add_year_survey_code(result_step_1_2)
 result_step_3
 ```
 
-
 ### Function to Add State Variable
 
-Next, we create a function to perform step 5 from above, which will take the output from the previous step, extract the last two characters of the area_name variable and store this in a new "state" variable. Again, the only argument is the name of the census data tibble output from the previous step.
+For the next steps, we will change up the order a bit. Instead of proceeding directly to step 4, which involves splitting the data into two separate data sets, we will first create functions to add variables as done in steps 5 and 6. This will allow us to then call these functions as a part of step 4, thus accomplishing all 3 steps with one higher-order function. 
+
+For step 5, the function below takes the output from the previous step and extracts the last two characters of the area_name variable to create the new "state" variable. The only argument is the name of the census data tibble output from the previous step.
 
 ```{r}
 add_state <- function(census_df) {
@@ -183,12 +186,11 @@ add_state <- function(census_df) {
 #test function
 result_step_5 <- add_state(result_step_3)
 head(result_step_5)
-#view(result_step_5)
 ```
 
 ### Function to Add Division Variable
 
-Next, we create a function to assign each state to its corresponding division in the United States. Given that the data set has not yet been split between county and non-county data, this function should return "ERROR" for the majority of observations which correspond to county-level data.
+For step 6, we create a function to assign each state to its corresponding division in the United States. Given that the data set has not yet been split between county and non-county data, this function will return "ERROR" for the majority of observations which correspond to county-level data if tested independently. However, in practice, it will be called after the split has been performed in step 4. 
 
 ```{r}
 add_division <- function(census_df) {
@@ -208,7 +210,8 @@ add_division <- function(census_df) {
             ifelse(area_name %in% c(
               "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
               "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", 
-              "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), "South Atlantic", 
+              "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), 
+              "South Atlantic", 
               ifelse(area_name %in% c(
                 "ALABAMA", "KENTUCKY", "MISSISSIPPI",
                 "TENNESSEE"), "East South Central", 
@@ -228,9 +231,9 @@ result_step_6 <- add_division(result_step_5)
 head(result_step_6)
 ```
 
-### Function for step 4
+### Function to Split the Data Set into County and Non-County Data
 
-Here, we create a function that will split the data into two datasets (one for county-level data, and one for non-county data), and then calls the above two functions to add the new variable to each new tibble.
+Here, we create a higher-order function that will split the data into two data sets (one for county-level data, and one for non-county data), add the county or non-county class to each data set, and then call the above two functions to add the new variables.
 
 ```{r}
 split_data <- function(census_df) {
@@ -242,24 +245,29 @@ split_data <- function(census_df) {
   noncounty_data <- census_df |>
     filter(!grepl(pattern = ", \\w\\w", area_name)) 
   class(noncounty_data) <- c("state", class(noncounty_data)) 
-  add_division(noncounty_data)
-  return(list(county_data, noncounty_data))
+  noncounty_data <- add_division(noncounty_data)
+  list("county_data" = county_data, 
+              "noncounty_data" = noncounty_data)
 }
 #test function
 census_df_list <- split_data(result_step_3)
-census_df_list
-#check class
-str(census_df_list)
 ```
 
-## Final data processing wrapper function
+### Final Data Processing Wrapper Function
+
+For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "measurement", such that only the url is absolutely required. 
 
 ```{r}
+##This is interesting--it looks like you used "enrollment" up above, which is what it is returning. So it must not work to have a default specified in both the original function and the wrapper function (even though this is exactly what the instructions say to do). It seems like once it gets to the core function, it is over-riding whatever default is put into the wrapper. I wonder if we should be removing the default from the core function to allow it to be specified here? Do you think we should ask? 
+
 data_processing_wrapper <- function(url, default_var_name = "measurement") {
   result <- read_csv(url) |>
-    process_data1() |>
-    process_data2()
+    select_pivot() |>
+    add_year_survey_code() |>
+    split_data() 
     return(result)
 }
-data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list$county_data
+census_df_list$noncounty_data
 ```
