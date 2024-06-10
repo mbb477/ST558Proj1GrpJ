@@ -26,7 +26,7 @@ head(census_1a_original)
 
 ### Steps 1 and 2: Select Columns and Pivot to Long Form
 
-The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.
+The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns ending in "D" correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.
 
 ```{r}
 census_1a_condensed <- census_1a_original |>
@@ -131,13 +131,13 @@ census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU0
 head(census_1b_original)
 ```
 
-### Function to Select Columns and Pivot to Long Form 
+### Function to Select Columns and Pivot to Long Form
 
 Creating the first part of the function is fairly simple and includes the steps of selecting our columns, renaming and pivoting. Our arguments for the function are our tibble we imported and a default variable name which can be changed as appropriate for the data set. Testing the function produces a similar result as obtained with the first data set.
 
 ```{r}
-process_data1 <- function(tibble_df, default_var_name = "enrollment") {
-  tibble_df |>
+process_data1 <- function(census_df, default_var_name = "enrollment") {
+  census_df |>
     select(Area_name, STCOU, ends_with("D")) |>
     rename(area_name = Area_name) |>
     pivot_longer(cols = 3:12, 
@@ -153,31 +153,24 @@ result_step_1_2
 
 The next part of the function incorporates the addition of our two extra columns. In this case, we also take in our tibble, but don't need to specify the default variable since it was specified in the previous function. Testing the function returned the expected tibble.
 
-```{r}
-process_data2 <- function(tibble_df) {
-  tibble_df |>
-    mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
-           survey_code = substr(item_id, 1, 7))
-}
-#test the function
-result_step_3 <- process_data2(result_step_1_2)
-result_step_3
-```
 
 ```{r}
-#Maggie's attempt to convert 00 codes and above to 2000+ (assuming that's what they mean). May not work, didn't want to mess up original code. Using 0 as a test to see if there are years that get missed, but didn't actually check this yet.  
-
-process_data2 <- function(census_df2=result_step_1_2) {
-  census_df2 |>
+process_data2 <- function(census_df) {
+  census_df |> 
     mutate(year = ifelse(substr(item_id, 7, 7)=="1", 
      (as.numeric(substr(item_id, 8, 9)) + 1900), 
      ifelse(substr(item_id, 7, 7)=="2", 
        (as.numeric(substr(item_id, 8, 9)) + 2000), 0)), 
       survey_code = substr(item_id, 1, 7))
 }
+
+#test the function
+result_step_3 <- process_data2(result_step_1_2)
+result_step_3
 ```
 
-### Function to Add State Variable 
+
+### Function to Add State Variable
 
 Next, we create a function to perform step 5 from above, which will take the output from the previous step, extract the last two characters of the area_name variable and store this in a new "state" variable. Again, the only argument is the name of the census data tibble output from the previous step.
 
@@ -187,6 +180,9 @@ add_state <- function(census_df) {
     mutate(state = substr(area_name, nchar(area_name)-1,
                         nchar(area_name)))
 }
+#test function
+result_step_5 <- add_state(result_step_3)
+head(result_step_5)
 ```
 
 ### Function to Add Division Variable
@@ -227,6 +223,9 @@ add_division <- function(census_df) {
                       "ALASKA", "CALIFORNIA", "HAWAII", "OREGON", 
                       "WASHINGTON"), "Pacific", "ERROR"))))))))))
 }
+#test function
+result_step_6 <- add_division(result_step_5)
+head(result_step_6)
 ```
 
 ### Function for step 4
@@ -256,7 +255,9 @@ split_data(result_step_3)
 data_processing_wrapper <- function(url, default_var_name = "measurement") {
   result <- read_csv(url) |>
     process_data1() |>
-    process_data2()
+    process_data2() |>
+    add_state() |>
+    add_division()
   return(result)
 }
 data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
