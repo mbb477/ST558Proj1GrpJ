@@ -181,8 +181,8 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 </div>
 </div>
 </section>
-<section id="steps-1-and-2-select-columns-and-pivot-to-long-form" class="level3">
-<h3 class="anchored" data-anchor-id="steps-1-and-2-select-columns-and-pivot-to-long-form">Steps 1 and 2: Select Columns and Pivot to Long Form</h3>
+<section id="steps-1-and-2-select-columns-and-pivot-to-long-form-remove-duplicate-district-of-columbia" class="level3">
+<h3 class="anchored" data-anchor-id="steps-1-and-2-select-columns-and-pivot-to-long-form-remove-duplicate-district-of-columbia">Steps 1 and 2: Select Columns and Pivot to Long Form, remove duplicate District of Columbia</h3>
 <p>The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a “D”. These columns ending in “D” correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>census_1a_condensed <span class="ot">&lt;-</span> census_1a_original <span class="sc">|&gt;</span></span>
@@ -190,8 +190,9 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">area_name =</span> Area_name) <span class="sc">|&gt;</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>, </span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"item_id"</span>, </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"enrollment"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(census_1a_condensed) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"enrollment"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(area_name <span class="sc">!=</span> <span class="st">"District of Columbia"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(census_1a_condensed) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
   area_name     STCOU item_id    enrollment
@@ -214,7 +215,7 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">survey_code =</span> <span class="fu">substr</span>(item_id, <span class="dv">1</span>, <span class="dv">7</span>))</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>census_1a_add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 31,980 × 6
+<pre><code># A tibble: 31,970 × 6
    area_name     STCOU item_id    enrollment  year survey_code
    &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
  1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101    
@@ -227,7 +228,7 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
  8 UNITED STATES 00000 EDU010194D   43369917  1994 EDU0101    
  9 UNITED STATES 00000 EDU010195D   43993459  1995 EDU0101    
 10 UNITED STATES 00000 EDU010196D   44715737  1996 EDU0101    
-# ℹ 31,970 more rows</code></pre>
+# ℹ 31,960 more rows</code></pre>
 </div>
 </div>
 </section>
@@ -316,25 +317,24 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"DELAWARE"</span>, <span class="st">"FLORIDA"</span>, <span class="st">"GEORGIA"</span>, <span class="st">"MARYLAND"</span>, </span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"NORTH CAROLINA"</span>, <span class="st">"SOUTH CAROLINA"</span>, <span class="st">"VIRGINIA"</span>,</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"DISTRICT OF COLUMBIA"</span>, <span class="st">"District of Columbia"</span>, </span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"WEST VIRGINIA"</span>), <span class="st">"South Atlantic"</span>,</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>              <span class="st">"ALABAMA"</span>, <span class="st">"KENTUCKY"</span>, <span class="st">"MISSISSIPPI"</span>, <span class="st">"TENNESSEE"</span>),</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>              <span class="st">"East South Central"</span>,</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>              <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ARKANSAS"</span>, <span class="st">"LOUISIANA"</span>, <span class="st">"OKLAHOMA"</span>, <span class="st">"TEXAS"</span>),</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>                <span class="st">"West South Central"</span>,</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ARIZONA"</span>, <span class="st">"COLORADO"</span>, <span class="st">"IDAHO"</span>, <span class="st">"MONTANA"</span>,</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"NEVADA"</span>, <span class="st">"NEW MEXICO"</span>, <span class="st">"UTAH"</span>, <span class="st">"WYOMING"</span>),</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Mountain"</span>,</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ALASKA"</span>, <span class="st">"CALIFORNIA"</span>, <span class="st">"HAWAII"</span>, <span class="st">"OREGON"</span>,</span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"WASHINGTON"</span>), <span class="st">"Pacific"</span>, </span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ERROR"</span>))))))))))</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>noncounty_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"DISTRICT OF COLUMBIA"</span>, <span class="st">"WEST VIRGINIA"</span>), <span class="st">"South Atlantic"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>              <span class="st">"ALABAMA"</span>, <span class="st">"KENTUCKY"</span>, <span class="st">"MISSISSIPPI"</span>, <span class="st">"TENNESSEE"</span>),</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>              <span class="st">"East South Central"</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>              <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ARKANSAS"</span>, <span class="st">"LOUISIANA"</span>, <span class="st">"OKLAHOMA"</span>, <span class="st">"TEXAS"</span>),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"West South Central"</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ARIZONA"</span>, <span class="st">"COLORADO"</span>, <span class="st">"IDAHO"</span>, <span class="st">"MONTANA"</span>,</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"NEVADA"</span>, <span class="st">"NEW MEXICO"</span>, <span class="st">"UTAH"</span>, <span class="st">"WYOMING"</span>),</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Mountain"</span>,</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ALASKA"</span>, <span class="st">"CALIFORNIA"</span>, <span class="st">"HAWAII"</span>, <span class="st">"OREGON"</span>,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"WASHINGTON"</span>), <span class="st">"Pacific"</span>, </span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ERROR"</span>))))))))))</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>noncounty_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 530 × 7
+<pre><code># A tibble: 520 × 7
    area_name     STCOU item_id    enrollment  year survey_code division
    &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;   
  1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101     ERROR   
@@ -347,7 +347,7 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
  8 UNITED STATES 00000 EDU010194D   43369917  1994 EDU0101     ERROR   
  9 UNITED STATES 00000 EDU010195D   43993459  1995 EDU0101     ERROR   
 10 UNITED STATES 00000 EDU010196D   44715737  1996 EDU0101     ERROR   
-# ℹ 520 more rows</code></pre>
+# ℹ 510 more rows</code></pre>
 </div>
 </div>
 </section>
@@ -505,25 +505,24 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 <span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
 <span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>              <span class="st">"DELAWARE"</span>, <span class="st">"FLORIDA"</span>, <span class="st">"GEORGIA"</span>, <span class="st">"MARYLAND"</span>, </span>
 <span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>              <span class="st">"NORTH CAROLINA"</span>, <span class="st">"SOUTH CAROLINA"</span>, <span class="st">"VIRGINIA"</span>, </span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>              <span class="st">"DISTRICT OF COLUMBIA"</span>, <span class="st">"District of Columbia"</span>, </span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>              <span class="st">"WEST VIRGINIA"</span>), <span class="st">"South Atlantic"</span>, </span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>              <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ALABAMA"</span>, <span class="st">"KENTUCKY"</span>, <span class="st">"MISSISSIPPI"</span>,</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">"TENNESSEE"</span>), <span class="st">"East South Central"</span>, </span>
-<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>                <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ARKANSAS"</span>, <span class="st">"LOUISIANA"</span>, <span class="st">"OKLAHOMA"</span>, <span class="st">"TEXAS"</span>),</span>
-<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"West South Central"</span>,</span>
-<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ARIZONA"</span>, <span class="st">"COLORADO"</span>, <span class="st">"IDAHO"</span>, <span class="st">"MONTANA"</span>,</span>
-<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"NEVADA"</span>, <span class="st">"NEW MEXICO"</span>, <span class="st">"UTAH"</span>, <span class="st">"WYOMING"</span>),</span>
-<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Mountain"</span>, </span>
-<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"ALASKA"</span>, <span class="st">"CALIFORNIA"</span>, <span class="st">"HAWAII"</span>, <span class="st">"OREGON"</span>, </span>
-<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"WASHINGTON"</span>), <span class="st">"Pacific"</span>, <span class="st">"ERROR"</span>))))))))))</span>
-<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="co">#test function</span></span>
-<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>result_step_6 <span class="ot">&lt;-</span> <span class="fu">add_division</span>(result_step_5)</span>
-<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(result_step_6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>              <span class="st">"DISTRICT OF COLUMBIA"</span>, <span class="st">"WEST VIRGINIA"</span>), <span class="st">"South Atlantic"</span>, </span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>              <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ALABAMA"</span>, <span class="st">"KENTUCKY"</span>, <span class="st">"MISSISSIPPI"</span>,</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>                <span class="st">"TENNESSEE"</span>), <span class="st">"East South Central"</span>, </span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>                <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ARKANSAS"</span>, <span class="st">"LOUISIANA"</span>, <span class="st">"OKLAHOMA"</span>, <span class="st">"TEXAS"</span>),</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"West South Central"</span>,</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ARIZONA"</span>, <span class="st">"COLORADO"</span>, <span class="st">"IDAHO"</span>, <span class="st">"MONTANA"</span>,</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"NEVADA"</span>, <span class="st">"NEW MEXICO"</span>, <span class="st">"UTAH"</span>, <span class="st">"WYOMING"</span>),</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Mountain"</span>, </span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">ifelse</span>(area_name <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"ALASKA"</span>, <span class="st">"CALIFORNIA"</span>, <span class="st">"HAWAII"</span>, <span class="st">"OREGON"</span>, </span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"WASHINGTON"</span>), <span class="st">"Pacific"</span>, <span class="st">"ERROR"</span>))))))))))</span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="co">#test function</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>result_step_6 <span class="ot">&lt;-</span> <span class="fu">add_division</span>(result_step_5)</span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(result_step_6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 8
   area_name     STCOU item_id    enrollment  year survey_code state division

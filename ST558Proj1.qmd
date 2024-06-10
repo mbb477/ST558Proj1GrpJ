@@ -24,7 +24,7 @@ census_1a_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU0
 head(census_1a_original)
 ```
 
-### Steps 1 and 2: Select Columns and Pivot to Long Form
+### Steps 1 and 2: Select Columns and Pivot to Long Form, remove duplicate District of Columbia
 
 The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns ending in "D" correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.
 
@@ -34,7 +34,8 @@ census_1a_condensed <- census_1a_original |>
   rename(area_name = Area_name) |>
   pivot_longer(cols = 3:12, 
                names_to = "item_id", 
-               values_to = "enrollment")
+               values_to = "enrollment") |> 
+  filter(area_name != "District of Columbia")
 head(census_1a_condensed) 
 ```
 
@@ -99,8 +100,7 @@ noncounty_data <- noncounty_data |>
           ifelse(area_name %in% c(
             "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
             "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA",
-            "DISTRICT OF COLUMBIA", "District of Columbia", 
-            "WEST VIRGINIA"), "South Atlantic",
+            "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), "South Atlantic",
             ifelse(area_name %in% c(
               "ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE"),
               "East South Central",
@@ -208,8 +208,7 @@ add_division <- function(census_df) {
             ifelse(area_name %in% c(
               "DELAWARE", "FLORIDA", "GEORGIA", "MARYLAND", 
               "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", 
-              "DISTRICT OF COLUMBIA", "District of Columbia", 
-              "WEST VIRGINIA"), "South Atlantic", 
+              "DISTRICT OF COLUMBIA", "WEST VIRGINIA"), "South Atlantic", 
               ifelse(area_name %in% c(
                 "ALABAMA", "KENTUCKY", "MISSISSIPPI",
                 "TENNESSEE"), "East South Central", 
