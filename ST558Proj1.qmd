@@ -183,6 +183,7 @@ add_state <- function(census_df) {
 #test function
 result_step_5 <- add_state(result_step_3)
 head(result_step_5)
+#view(result_step_5)
 ```
 
 ### Function to Add Division Variable
@@ -235,7 +236,7 @@ Here, we create a function that will split the data into two datasets (one for c
 ```{r}
 split_data <- function(census_df) {
   county_data <- census_df |>
-    filter(grepl(pattern = ", \\w\\w", area_name)) 
+    filter(grepl(pattern = ", \\w\\w", area_name))
   class(county_data) <- c("county", class(county_data)) 
   county_data <- add_state(county_data)
   
@@ -243,10 +244,13 @@ split_data <- function(census_df) {
     filter(!grepl(pattern = ", \\w\\w", area_name)) 
   class(noncounty_data) <- c("state", class(noncounty_data)) 
   add_division(noncounty_data)
+  return(list(county_data, noncounty_data))
 }
 #test function
-split_data(result_step_3)
-
+census_df_list <- split_data(result_step_3)
+census_df_list
+#check class
+str(census_df_list)
 ```
 
 ## Final data processing wrapper function
@@ -255,10 +259,8 @@ split_data(result_step_3)
 data_processing_wrapper <- function(url, default_var_name = "measurement") {
   result <- read_csv(url) |>
     process_data1() |>
-    process_data2() |>
-    add_state() |>
-    add_division()
-  return(result)
+    process_data2()
+    return(result)
 }
 data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
