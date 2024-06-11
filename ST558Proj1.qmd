@@ -127,7 +127,7 @@ We now turn to a second data set EDU01b, which contains data structured similarl
 
 ### Import the data
 
-To begin, we import the new data set we will be working with. Although this will ultimately incorporate this step into our final wrapper function, importing at this point allows us to build and test each component of our functions.
+To begin, we import the new data set we will be working with. Although this step will ultimately be incorporated into our final wrapper function, importing at this point allows us to build and test each component of our functions.
 
 ```{r}
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
@@ -146,7 +146,7 @@ select_pivot <- function(census_df, default_var_name = "enrollment") {
     pivot_longer(cols = 3:12, 
                  names_to = "item_id", 
                  values_to = default_var_name)
-}
+}  
 #test function
 result_step_1_2 <- select_pivot(census_1b_original)
 result_step_1_2
@@ -267,7 +267,45 @@ data_processing_wrapper <- function(url, default_var_name = "measurement") {
     split_data() 
     return(result)
 }
+
 census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 census_df_list$county_data
 census_df_list$noncounty_data
 ```
+
+
+## Alternative wrapper code
+
+this works but I don't know if it is ideal.Needed to remove the pipe so R 
+doesn't look for another "result"
+
+```{r}
+data_processing_wrapper <- function(url, default_var_name = "measurement") {
+  result <- read_csv(url)
+    result <- select_pivot(result, default_var_name = default_var_name) |>
+    add_year_survey_code() |>
+    split_data() 
+  return(result)
+}
+
+census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list
+```
+
+# another test specifying another default
+
+```{r}
+data_processing_wrapper <- function(url, default_var_name = "measurement") {
+  result <- read_csv(url)
+    result <- select_pivot(result, default_var_name = default_var_name) |>
+    add_year_survey_code() |>
+    split_data() 
+  return(result)
+}
+
+
+census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+                                          default_var_name = "enrollment")
+census_df_list
+```
+
