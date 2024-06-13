@@ -286,8 +286,8 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
   return(result)
 }
 
-census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-census_df_list
+census_df_list2 <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list2
 ```
 
 # another test specifying another default
@@ -305,4 +305,23 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
 census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
                                           default_var_name = "measurement")
 census_df_list
+```
+
+## Use wrapper function on our first data set
+
+```{r}
+census_df_list1 <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+census_df_list1
+```
+
+## Short function that takes in the results of two calls of the wrapper function and combines the county level and non county level
+
+```{r}
+combine_census_lists <- function(list1, list2) {
+  county_bind_result <- bind_rows(list1$county_data, list2$county_data) 
+  noncounty_bind_result <- bind_rows(list1$noncounty_data, list2$noncounty_data) 
+  return(list(county_bind_result, noncounty_bind_result))
+}
+combined_census_lists <- combine_census_lists(census_df_list1, census_df_list2)
+combined_census_lists
 ```
