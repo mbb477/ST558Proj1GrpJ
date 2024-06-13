@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="M. Sweitzer, M. Beebe">
-<meta name="dcterms.date" content="2024-06-11">
+<meta name="dcterms.date" content="2024-06-13">
 
 <title>ST558 Project 1</title>
 <style>
@@ -135,7 +135,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 11, 2024</p>
+      <p class="date">June 13, 2024</p>
     </div>
   </div>
   
@@ -632,7 +632,7 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 <h2 class="anchored" data-anchor-id="alternative-wrapper-code">Alternative wrapper code</h2>
 <p>this works but I don’t know if it is ideal.Needed to remove the pipe so R doesn’t look for another “result”</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>data_processing_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(url, <span class="at">default_var_name =</span> <span class="st">"measurement"</span>) {</span>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>data_processing_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(url, <span class="at">default_var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(url)</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">select_pivot</span>(result, <span class="at">default_var_name =</span> default_var_name) <span class="sc">|&gt;</span></span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_year_survey_code</span>() <span class="sc">|&gt;</span></span>
@@ -652,67 +652,6 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>census_df_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$county_data
-# A tibble: 31,450 × 7
-   area_name   STCOU item_id    measurement  year survey_code state
-   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;
- 1 Autauga, AL 01001 EDU010197D        8099  1997 EDU0101     AL   
- 2 Autauga, AL 01001 EDU010198D        8211  1998 EDU0101     AL   
- 3 Autauga, AL 01001 EDU010199D        8489  1999 EDU0101     AL   
- 4 Autauga, AL 01001 EDU010200D        8912  2000 EDU0102     AL   
- 5 Autauga, AL 01001 EDU010201D        8626  2001 EDU0102     AL   
- 6 Autauga, AL 01001 EDU010202D        8762  2002 EDU0102     AL   
- 7 Autauga, AL 01001 EDU015203D        9105  2003 EDU0152     AL   
- 8 Autauga, AL 01001 EDU015204D        9200  2004 EDU0152     AL   
- 9 Autauga, AL 01001 EDU015205D        9559  2005 EDU0152     AL   
-10 Autauga, AL 01001 EDU015206D        9652  2006 EDU0152     AL   
-# ℹ 31,440 more rows
-
-$noncounty_data
-# A tibble: 530 × 7
-   area_name     STCOU item_id    measurement  year survey_code division
-   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;   
- 1 UNITED STATES 00000 EDU010197D    44534459  1997 EDU0101     ERROR   
- 2 UNITED STATES 00000 EDU010198D    46245814  1998 EDU0101     ERROR   
- 3 UNITED STATES 00000 EDU010199D    46368903  1999 EDU0101     ERROR   
- 4 UNITED STATES 00000 EDU010200D    46818690  2000 EDU0102     ERROR   
- 5 UNITED STATES 00000 EDU010201D    47127066  2001 EDU0102     ERROR   
- 6 UNITED STATES 00000 EDU010202D    47606570  2002 EDU0102     ERROR   
- 7 UNITED STATES 00000 EDU015203D    48506317  2003 EDU0152     ERROR   
- 8 UNITED STATES 00000 EDU015204D    48693287  2004 EDU0152     ERROR   
- 9 UNITED STATES 00000 EDU015205D    48978555  2005 EDU0152     ERROR   
-10 UNITED STATES 00000 EDU015206D    49140702  2006 EDU0152     ERROR   
-# ℹ 520 more rows</code></pre>
-</div>
-</div>
-</section>
-</section>
-<section id="another-test-specifying-another-default" class="level1">
-<h1>another test specifying another default</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>data_processing_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(url, <span class="at">default_var_name =</span> <span class="st">"measurement"</span>) {</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(url)</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">select_pivot</span>(result, <span class="at">default_var_name =</span> default_var_name) <span class="sc">|&gt;</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_year_survey_code</span>() <span class="sc">|&gt;</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">split_data</span>() </span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>census_df_list <span class="ot">&lt;-</span> <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span>, </span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">default_var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 3198 Columns: 42
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (22): Area_name, STCOU, EDU010197N1, EDU010197N2, EDU010198N1, EDU010198...
-dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>census_df_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$county_data
 # A tibble: 31,450 × 7
@@ -744,6 +683,67 @@ $noncounty_data
  8 UNITED STATES 00000 EDU015204D   48693287  2004 EDU0152     ERROR   
  9 UNITED STATES 00000 EDU015205D   48978555  2005 EDU0152     ERROR   
 10 UNITED STATES 00000 EDU015206D   49140702  2006 EDU0152     ERROR   
+# ℹ 520 more rows</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="another-test-specifying-another-default" class="level1">
+<h1>another test specifying another default</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>data_processing_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(url, <span class="at">default_var_name =</span> <span class="st">"enrollment"</span>) {</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(url)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">select_pivot</span>(result, <span class="at">default_var_name =</span> default_var_name) <span class="sc">|&gt;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">add_year_survey_code</span>() <span class="sc">|&gt;</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">split_data</span>() </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>census_df_list <span class="ot">&lt;-</span> <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span>, </span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">default_var_name =</span> <span class="st">"measurement"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 3198 Columns: 42
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (22): Area_name, STCOU, EDU010197N1, EDU010197N2, EDU010198N1, EDU010198...
+dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>census_df_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$county_data
+# A tibble: 31,450 × 7
+   area_name   STCOU item_id    measurement  year survey_code state
+   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;
+ 1 Autauga, AL 01001 EDU010197D        8099  1997 EDU0101     AL   
+ 2 Autauga, AL 01001 EDU010198D        8211  1998 EDU0101     AL   
+ 3 Autauga, AL 01001 EDU010199D        8489  1999 EDU0101     AL   
+ 4 Autauga, AL 01001 EDU010200D        8912  2000 EDU0102     AL   
+ 5 Autauga, AL 01001 EDU010201D        8626  2001 EDU0102     AL   
+ 6 Autauga, AL 01001 EDU010202D        8762  2002 EDU0102     AL   
+ 7 Autauga, AL 01001 EDU015203D        9105  2003 EDU0152     AL   
+ 8 Autauga, AL 01001 EDU015204D        9200  2004 EDU0152     AL   
+ 9 Autauga, AL 01001 EDU015205D        9559  2005 EDU0152     AL   
+10 Autauga, AL 01001 EDU015206D        9652  2006 EDU0152     AL   
+# ℹ 31,440 more rows
+
+$noncounty_data
+# A tibble: 530 × 7
+   area_name     STCOU item_id    measurement  year survey_code division
+   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;   
+ 1 UNITED STATES 00000 EDU010197D    44534459  1997 EDU0101     ERROR   
+ 2 UNITED STATES 00000 EDU010198D    46245814  1998 EDU0101     ERROR   
+ 3 UNITED STATES 00000 EDU010199D    46368903  1999 EDU0101     ERROR   
+ 4 UNITED STATES 00000 EDU010200D    46818690  2000 EDU0102     ERROR   
+ 5 UNITED STATES 00000 EDU010201D    47127066  2001 EDU0102     ERROR   
+ 6 UNITED STATES 00000 EDU010202D    47606570  2002 EDU0102     ERROR   
+ 7 UNITED STATES 00000 EDU015203D    48506317  2003 EDU0152     ERROR   
+ 8 UNITED STATES 00000 EDU015204D    48693287  2004 EDU0152     ERROR   
+ 9 UNITED STATES 00000 EDU015205D    48978555  2005 EDU0152     ERROR   
+10 UNITED STATES 00000 EDU015206D    49140702  2006 EDU0152     ERROR   
 # ℹ 520 more rows</code></pre>
 </div>
 </div>

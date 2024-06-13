@@ -173,7 +173,7 @@ result_step_3
 
 ### Function to Add State Variable
 
-For the next steps, we will change up the order a bit. Instead of proceeding directly to step 4, which involves splitting the data into two separate data sets, we will first create functions to add variables as done in steps 5 and 6. This will allow us to then call these functions as a part of step 4, thus accomplishing all 3 steps with one higher-order function. 
+For the next steps, we will change up the order a bit. Instead of proceeding directly to step 4, which involves splitting the data into two separate data sets, we will first create functions to add variables as done in steps 5 and 6. This will allow us to then call these functions as a part of step 4, thus accomplishing all 3 steps with one higher-order function.
 
 For step 5, the function below takes the output from the previous step and extracts the last two characters of the area_name variable to create the new "state" variable. The only argument is the name of the census data tibble output from the previous step.
 
@@ -190,7 +190,7 @@ head(result_step_5)
 
 ### Function to Add Division Variable
 
-For step 6, we create a function to assign each state to its corresponding division in the United States. Given that the data set has not yet been split between county and non-county data, this function will return "ERROR" for the majority of observations which correspond to county-level data if tested independently. However, in practice, it will be called after the split has been performed in step 4. 
+For step 6, we create a function to assign each state to its corresponding division in the United States. Given that the data set has not yet been split between county and non-county data, this function will return "ERROR" for the majority of observations which correspond to county-level data if tested independently. However, in practice, it will be called after the split has been performed in step 4.
 
 ```{r}
 add_division <- function(census_df) {
@@ -255,7 +255,7 @@ census_df_list <- split_data(result_step_3)
 
 ### Final Data Processing Wrapper Function
 
-For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "measurement", such that only the url is absolutely required. 
+For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "measurement", such that only the url is absolutely required.
 
 ```{r}
 ##This is interesting--it looks like you used "enrollment" up above, which is what it is returning. So it must not work to have a default specified in both the original function and the wrapper function (even though this is exactly what the instructions say to do). It seems like once it gets to the core function, it is over-riding whatever default is put into the wrapper. I wonder if we should be removing the default from the core function to allow it to be specified here? Do you think we should ask? 
@@ -273,14 +273,12 @@ census_df_list$county_data
 census_df_list$noncounty_data
 ```
 
-
 ## Alternative wrapper code
 
-this works but I don't know if it is ideal.Needed to remove the pipe so R 
-doesn't look for another "result"
+this works but I don't know if it is ideal.Needed to remove the pipe so R doesn't look for another "result"
 
 ```{r}
-data_processing_wrapper <- function(url, default_var_name = "measurement") {
+data_processing_wrapper <- function(url, default_var_name = "enrollment") {
   result <- read_csv(url)
     result <- select_pivot(result, default_var_name = default_var_name) |>
     add_year_survey_code() |>
@@ -295,7 +293,7 @@ census_df_list
 # another test specifying another default
 
 ```{r}
-data_processing_wrapper <- function(url, default_var_name = "measurement") {
+data_processing_wrapper <- function(url, default_var_name = "enrollment") {
   result <- read_csv(url)
     result <- select_pivot(result, default_var_name = default_var_name) |>
     add_year_survey_code() |>
@@ -305,7 +303,6 @@ data_processing_wrapper <- function(url, default_var_name = "measurement") {
 
 
 census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
-                                          default_var_name = "enrollment")
+                                          default_var_name = "measurement")
 census_df_list
 ```
-
