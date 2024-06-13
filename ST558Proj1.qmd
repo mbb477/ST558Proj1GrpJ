@@ -258,26 +258,6 @@ census_df_list <- split_data(result_step_3)
 For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "measurement", such that only the url is absolutely required.
 
 ```{r}
-##This is interesting--it looks like you used "enrollment" up above, which is what it is returning. So it must not work to have a default specified in both the original function and the wrapper function (even though this is exactly what the instructions say to do). It seems like once it gets to the core function, it is over-riding whatever default is put into the wrapper. I wonder if we should be removing the default from the core function to allow it to be specified here? Do you think we should ask? 
-
-data_processing_wrapper <- function(url, default_var_name = "measurement") {
-  result <- read_csv(url) |>
-    select_pivot() |>
-    add_year_survey_code() |>
-    split_data() 
-    return(result)
-}
-
-census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-census_df_list$county_data
-census_df_list$noncounty_data
-```
-
-## Alternative wrapper code
-
-this works but I don't know if it is ideal.Needed to remove the pipe so R doesn't look for another "result"
-
-```{r}
 data_processing_wrapper <- function(url, default_var_name = "enrollment") {
   result <- read_csv(url)
     result <- select_pivot(result, default_var_name = default_var_name) |>
@@ -286,8 +266,8 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
   return(result)
 }
 
-census_df_list2 <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-census_df_list2
+census_df_list_EDU01b <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list_EDU01b
 ```
 
 # another test specifying another default
@@ -302,16 +282,16 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
 }
 
 
-census_df_list <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+census_df_list_EDU1b <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
                                           default_var_name = "measurement")
-census_df_list
+census_df_list_EDU1b
 ```
 
 ## Use wrapper function on our first data set
 
 ```{r}
-census_df_list1 <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
-census_df_list1
+census_df_list_EDU01a <- data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+census_df_list_EDU01a
 ```
 
 ## Short function that takes in the results of two calls of the wrapper function and combines the county level and non county level
@@ -322,6 +302,6 @@ combine_census_lists <- function(list1, list2) {
   noncounty_bind_result <- bind_rows(list1$noncounty_data, list2$noncounty_data) 
   return(list(county_bind_result, noncounty_bind_result))
 }
-combined_census_lists <- combine_census_lists(census_df_list1, census_df_list2)
-combined_census_lists
+combined_census_lists_EDU <- combine_census_lists(census_df_list_EDU01a, census_df_list_EDU01b)
+combined_census_lists_EDU
 ```
