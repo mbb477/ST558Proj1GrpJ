@@ -312,8 +312,6 @@ need to first remove error rows (United States)
 
 group by division and year
 
-check summarize by adding new column
-
 ```{r}
 #view(combined_census_lists_EDU[[2]])
 result <- combined_census_lists_EDU[[2]] |>
@@ -332,14 +330,15 @@ result <- combined_census_lists_EDU[[2]] |>
 result
 ```
 
-piecing function together:
+incorporate var_name somehow in the plot function,
 
 ```{r}
 state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
     filter(area_name != "UNITED STATES") |> 
-    group_by(division, year)
-  return(result)
+    group_by(division, year) |> 
+    summarize(mean(get(var_name)))
+             return(result)
 }
 state.plot(combined_census_lists_EDU)
 ```
