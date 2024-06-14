@@ -233,7 +233,7 @@ add_division <- function(census_df) {
 
 ### Function to Split the Data Set into County and Non-County Data
 
-Here, we create a higher-order function that will split the data into two data sets (one for county-level data, and one for non-county data), add the county or non-county class to each data set, and then call the above two functions to add the new variables.
+Here, we create a higher-order function that will split the data into two data sets (one for county-level data, and one for non-county data), add the county or state class to each data set, and then call the above two functions to add the new variables.
 
 ```{r}
 split_data <- function(census_df) {
@@ -255,7 +255,7 @@ split_data <- function(census_df) {
 
 ### Final Data Processing Wrapper Function
 
-For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "enrollment", such that only the url is absolutely required.
+For our final step of data processing, we now create a "wrapper function" that will apply the above functions to accomplish all of these steps at once. The wrapper function will begin by reading in the data, and thus takes in an initial argument defining the url to access the data. The second argument defines the name of the variable that will store the measurement for each observation once the pivot to long form is complete. As above, this argument is set to a default of "enrollment", such that only the url is absolutely required. The result is a list with two tibbles, one for county and one for non-county (state).
 
 ```{r}
 data_processing_wrapper <- function(url, default_var_name = "enrollment") {
@@ -269,7 +269,7 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
 
 ### Calling the Functions
 
-Now, we call our function twice, once for data set censusEDU01a and again for EDU01a and again for EDU01b, which will create two lists, each containing two tibbles (one for county and one for non-county data). 
+Now, we call our function twice, once for data set censusEDU01a and again for EDU01a and again for EDU01b, which will create two lists, each containing two tibbles (one for county and one for non-county data).
 
 ```{r}
 
@@ -283,9 +283,9 @@ census_df_list_EDU01a
 census_df_list_EDU01b
 ```
 
-### Combining the Data 
+### Data Combining Function
 
-In this final step for preparing the data, we create a function that takes in the results of two calls of the wrapper function and combines them. Specifically, we use the bind_rows function to append the rows of two like tibbles together, resulting in two new comprehensive tibbles (one for county and one for noncounty data). These are output into a single list object. 
+In this final step for preparing the data, we create a function that takes in the results of two calls of the wrapper function and combines them. Specifically, we use the bind_rows function to append the rows of two like tibbles together, resulting in two new comprehensive tibbles (one for county and one for state data). These are output into a single list object.
 
 ```{r}
 combine_census_lists <- function(list1, list2) {
@@ -299,3 +299,63 @@ combined_census_lists_EDU <- combine_census_lists(census_df_list_EDU01a, census_
 combined_census_lists_EDU
 
 ```
+
+# Generic Summarizing Functions
+
+## State Plotting Function
+
+working out steps
+
+need to first remove error rows (United States)
+
+change division to factor
+
+```{r}
+#view(combined_census_lists_EDU[[2]])
+result <- combined_census_lists_EDU[[2]] |>
+  filter(area_name != "UNITED STATES") |> 
+  mutate(Division = as.factor(division))
+result
+```
+
+summarize function
+
+```{r}
+
+```
+
+piecing function together:
+
+```{r}
+#| eval: false
+state.plot <- function(df, default_var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division)
+  
+
+```
+
+## County Plotting Function
+
+# Putting it Together (need a better name)
+
+## EDU Data Sets 
+
+### Data Processing Function for EDU Data Sets
+
+### Data Combining Function for EDU Data Sets
+
+### State Plot Function for EDU Data Sets
+
+### County Plot Function for EDU Data Sets
+
+## PST  Data sets
+
+### Data Processing Function for PST Data Sets
+
+### Data Combining Function for PST Data Sets
+
+### State Plot Function for PST Data Sets
+
+### County Plot Function for PST Data Sets
