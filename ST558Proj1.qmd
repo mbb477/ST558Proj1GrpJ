@@ -39,6 +39,7 @@ census_1a_condensed <- census_1a_original |>
                values_to = "enrollment") |> 
   filter(area_name != "District of Columbia")
 head(census_1a_condensed) 
+view(census_1a_condensed)
 ```
 
 ### Step 3: Add Year and Survey Code Columns
@@ -145,7 +146,8 @@ select_pivot <- function(census_df, default_var_name = "enrollment") {
     rename(area_name = Area_name) |>
     pivot_longer(cols = 3:12, 
                  names_to = "item_id", 
-                 values_to = default_var_name)
+                 values_to = default_var_name) |>
+    filter(area_name != "District of Columbia")
 }  
 #test function
 #result_step_1_2 <- select_pivot(census_1b_original)
@@ -308,51 +310,87 @@ working out steps
 
 need to first remove error rows (United States)
 
-change division to factor
+group by division and year
+
+check summarize by adding new column
 
 ```{r}
 #view(combined_census_lists_EDU[[2]])
 result <- combined_census_lists_EDU[[2]] |>
   filter(area_name != "UNITED STATES") |> 
-  mutate(Division = as.factor(division))
+  group_by(division, year)
 result
 ```
 
-summarize function
+check summarize and groupings
 
 ```{r}
-
+result <- combined_census_lists_EDU[[2]] |>
+  filter(area_name != "UNITED STATES") |> 
+  group_by(division, year) |>
+  summarize(mean_enrollment = mean(enrollment))
+result
 ```
 
 piecing function together:
 
 ```{r}
-#| eval: false
-state.plot <- function(df, default_var_name = "enrollment") {
+state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
     filter(area_name != "UNITED STATES") |> 
-    group_by(division)
-  
-
+    group_by(division, year)
+  return(result)
+}
+state.plot(combined_census_lists_EDU)
 ```
 
 ## County Plotting Function
 
 # Putting it Together (need a better name)
 
-## EDU Data Sets 
+## EDU Data Sets
 
 ### Data Processing Function for EDU Data Sets
 
+#### EDU1a
+
+```{r}
+census_df_list_EDU01a <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+census_df_list_EDU01a
+```
+
+#### EDU1b
+
+```{r}
+census_df_list_EDU01b <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_df_list_EDU01b
+```
+
 ### Data Combining Function for EDU Data Sets
+
+```{r}
+combined_census_lists_EDU <- 
+  combine_census_lists(census_df_list_EDU01a, census_df_list_EDU01b)
+combined_census_lists_EDU
+```
 
 ### State Plot Function for EDU Data Sets
 
 ### County Plot Function for EDU Data Sets
 
-## PST  Data sets
+## PST Data sets
 
 ### Data Processing Function for PST Data Sets
+
+#### PST01a
+
+#### PST01b
+
+#### PST01c
+
+#### PST01d
 
 ### Data Combining Function for PST Data Sets
 
