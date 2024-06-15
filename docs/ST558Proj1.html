@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="M. Sweitzer, M. Beebe">
-<meta name="dcterms.date" content="2024-06-14">
+<meta name="dcterms.date" content="2024-06-15">
 
 <title>ST558 Project 1</title>
 <style>
@@ -135,7 +135,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 14, 2024</p>
+      <p class="date">June 15, 2024</p>
     </div>
   </div>
   
@@ -735,7 +735,7 @@ $noncounty_data
 # ℹ 170 more rows</code></pre>
 </div>
 </div>
-<p>incorporate var_name somehow in the plot function,</p>
+<p>incorporate var_name in the plot function,</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
@@ -767,22 +767,42 @@ $noncounty_data
 # ℹ 170 more rows</code></pre>
 </div>
 </div>
+<p>add plot instance</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(area_name <span class="sc">!=</span> <span class="st">"UNITED STATES"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(division, year) <span class="sc">|&gt;</span> </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_value =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_value))</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ST558Proj1_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="county-plotting-function" class="level2">
 <h2 class="anchored" data-anchor-id="county-plotting-function">County Plotting Function</h2>
 </section>
 </section>
-<section id="putting-it-together-need-a-better-name" class="level1">
-<h1>Putting it Together (need a better name)</h1>
+<section id="putting-it-together-need-a-better-name-maybe" class="level1">
+<h1>Putting it Together (need a better name, maybe)</h1>
 <section id="edu-data-sets" class="level2">
 <h2 class="anchored" data-anchor-id="edu-data-sets">EDU Data Sets</h2>
-<section id="data-processing-function-for-edu-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="data-processing-function-for-edu-data-sets">Data Processing Function for EDU Data Sets</h3>
+<section id="data-processing-function-applied-to-edu-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="data-processing-function-applied-to-edu-data-sets">Data Processing Function Applied to EDU Data Sets</h3>
 <section id="edu1a" class="level4">
 <h4 class="anchored" data-anchor-id="edu1a">EDU1a</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01a <span class="ot">&lt;-</span> </span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01a <span class="ot">&lt;-</span> </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 3198 Columns: 42
 ── Column specification ────────────────────────────────────────────────────────
@@ -793,7 +813,7 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$county_data
 # A tibble: 31,450 × 7
@@ -832,8 +852,8 @@ $noncounty_data
 <section id="edu1b" class="level4">
 <h4 class="anchored" data-anchor-id="edu1b">EDU1b</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01b <span class="ot">&lt;-</span> </span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01b <span class="ot">&lt;-</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_processing_wrapper</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 3198 Columns: 42
 ── Column specification ────────────────────────────────────────────────────────
@@ -844,7 +864,7 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>census_df_list_EDU01b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$county_data
 # A tibble: 31,450 × 7
@@ -881,12 +901,12 @@ $noncounty_data
 </div>
 </section>
 </section>
-<section id="data-combining-function-for-edu-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="data-combining-function-for-edu-data-sets">Data Combining Function for EDU Data Sets</h3>
+<section id="data-combining-function-applied-to-edu-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="data-combining-function-applied-to-edu-data-sets">Data Combining Function Applied to EDU Data Sets</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>combined_census_lists_EDU <span class="ot">&lt;-</span> </span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">combine_census_lists</span>(census_df_list_EDU01a, census_df_list_EDU01b)</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>combined_census_lists_EDU</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>combined_census_lists_EDU <span class="ot">&lt;-</span> </span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">combine_census_lists</span>(census_df_list_EDU01a, census_df_list_EDU01b)</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>combined_census_lists_EDU</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$county_data
 # A tibble: 62,900 × 7
@@ -922,17 +942,17 @@ $noncounty_data
 </div>
 </div>
 </section>
-<section id="state-plot-function-for-edu-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="state-plot-function-for-edu-data-sets">State Plot Function for EDU Data Sets</h3>
+<section id="state-plot-function-applied-to-edu-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="state-plot-function-applied-to-edu-data-sets">State Plot Function Applied to EDU Data Sets</h3>
 </section>
-<section id="county-plot-function-for-edu-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="county-plot-function-for-edu-data-sets">County Plot Function for EDU Data Sets</h3>
+<section id="county-plot-function-applied-to-edu-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="county-plot-function-applied-to-edu-data-sets">County Plot Function Applied to EDU Data Sets</h3>
 </section>
 </section>
 <section id="pst-data-sets" class="level2">
 <h2 class="anchored" data-anchor-id="pst-data-sets">PST Data sets</h2>
-<section id="data-processing-function-for-pst-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="data-processing-function-for-pst-data-sets">Data Processing Function for PST Data Sets</h3>
+<section id="data-processing-function-applied-to-pst-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="data-processing-function-applied-to-pst-data-sets">Data Processing Function Applied to PST Data Sets</h3>
 <section id="pst01a" class="level4">
 <h4 class="anchored" data-anchor-id="pst01a">PST01a</h4>
 </section>
@@ -946,14 +966,14 @@ $noncounty_data
 <h4 class="anchored" data-anchor-id="pst01d">PST01d</h4>
 </section>
 </section>
-<section id="data-combining-function-for-pst-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="data-combining-function-for-pst-data-sets">Data Combining Function for PST Data Sets</h3>
+<section id="data-combining-function-applied-to-pst-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="data-combining-function-applied-to-pst-data-sets">Data Combining Function Applied to PST Data Sets</h3>
 </section>
-<section id="state-plot-function-for-pst-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="state-plot-function-for-pst-data-sets">State Plot Function for PST Data Sets</h3>
+<section id="state-plot-function-applied-to-pst-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="state-plot-function-applied-to-pst-data-sets">State Plot Function Applied to PST Data Sets</h3>
 </section>
-<section id="county-plot-function-for-pst-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="county-plot-function-for-pst-data-sets">County Plot Function for PST Data Sets</h3>
+<section id="county-plot-function-applied-to-pst-data-sets" class="level3">
+<h3 class="anchored" data-anchor-id="county-plot-function-applied-to-pst-data-sets">County Plot Function Applied to PST Data Sets</h3>
 
 
 </section>

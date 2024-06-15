@@ -330,7 +330,7 @@ result <- combined_census_lists_EDU[[2]] |>
 result
 ```
 
-incorporate var_name somehow in the plot function,
+incorporate var_name in the plot function,
 
 ```{r}
 state.plot <- function(df, var_name = "enrollment") {
@@ -343,13 +343,29 @@ state.plot <- function(df, var_name = "enrollment") {
 state.plot(combined_census_lists_EDU)
 ```
 
+add plot instance
+
+```{r}
+
+state.plot <- function(df, var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division, year) |> 
+    summarize(mean_value = mean(get(var_name)), .groups = "drop")
+  g <- ggplot(result, aes(x = year, y = mean_value))
+  return(g)
+}
+
+state.plot(combined_census_lists_EDU)
+```
+
 ## County Plotting Function
 
-# Putting it Together (need a better name)
+# Putting it Together (need a better name, maybe)
 
 ## EDU Data Sets
 
-### Data Processing Function for EDU Data Sets
+### Data Processing Function Applied to EDU Data Sets
 
 #### EDU1a
 
@@ -367,7 +383,7 @@ census_df_list_EDU01b <-
 census_df_list_EDU01b
 ```
 
-### Data Combining Function for EDU Data Sets
+### Data Combining Function Applied to EDU Data Sets
 
 ```{r}
 combined_census_lists_EDU <- 
@@ -375,13 +391,13 @@ combined_census_lists_EDU <-
 combined_census_lists_EDU
 ```
 
-### State Plot Function for EDU Data Sets
+### State Plot Function Applied to EDU Data Sets
 
-### County Plot Function for EDU Data Sets
+### County Plot Function Applied to EDU Data Sets
 
 ## PST Data sets
 
-### Data Processing Function for PST Data Sets
+### Data Processing Function Applied to  PST Data Sets
 
 #### PST01a
 
@@ -391,8 +407,8 @@ combined_census_lists_EDU
 
 #### PST01d
 
-### Data Combining Function for PST Data Sets
+### Data Combining Function Applied to PST Data Sets
 
-### State Plot Function for PST Data Sets
+### State Plot Function Applied to PST Data Sets
 
-### County Plot Function for PST Data Sets
+### County Plot Function Applied to PST Data Sets
