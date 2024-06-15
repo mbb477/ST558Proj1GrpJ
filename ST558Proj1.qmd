@@ -304,13 +304,13 @@ combined_census_lists_EDU
 
 # Generic Summarizing Functions
 
+The goal of this section is to create two functions that will take in combined data sets (as a list) from our data combining function and create plots for county and non-county (state) data. Details of this functions will be provided in subsequent sections.
+
 ## State Plotting Function
 
-working out steps
+For the state plotting function, we want to create a function that will take in our combined census data sets and our default variable as arguments and outputs a plot of year versus the mean of of the default variable for each division. To accomplish this, we first need to do some manipulation with our tibble. First, we isolate the proper tibble from the list using \[\[\]\]. Since the United States is not a division and has "ERROR" in the division column, we need to filter to remove those rows. Finally we can group by year and division to so that the appropriate means are calculated. To calculate a mean for each year and division combination, we use summarize and reference our default variable name for the mean function.
 
-need to first remove error rows (United States)
-
-group by division and year
+Now that our data is in the proper form and summary statistics obtained, we can create our line plot. We use ggplot to create a plot instance. The plot instance needs two arguments, one specifying our data and an aesthetic (aes) mapping argument. The aes mapping defines the x and y axis variables, as well as mapping for division so the plot assigns a different color and line to each division. Next we add layers. Since we want a line connecting years for each division, we use geom_line. We chose to leave the defaults in place so no arguments are specified. A labs layer was then added to modify some labels. The x-axis and legend labels are capitalized and the title and axis label specified in a way that will allow the names to change dynamically according to the default variable name used when calling the function.
 
 ```{r}
 #view(combined_census_lists_EDU[[2]])
@@ -346,13 +346,33 @@ state.plot(combined_census_lists_EDU)
 add plot instance
 
 ```{r}
-
 state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
     filter(area_name != "UNITED STATES") |> 
     group_by(division, year) |> 
-    summarize(mean_value = mean(get(var_name)), .groups = "drop")
-  g <- ggplot(result, aes(x = year, y = mean_value))
+    summarize(mean_values = mean(get(var_name)))
+  g <- ggplot(result, aes(x = year, y = mean_values))
+  return(g)
+}
+
+state.plot(combined_census_lists_EDU)
+```
+
+add layers
+
+need to add "mean" so that y-axis is "mean enrollment", maybe capitalize labels
+
+```{r}
+#| eval: false
+state.plot <- function(df, var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division, year) |> 
+    summarize(mean_values = mean(get(var_name)))
+  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
+    geom_line() +
+    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
+          title = paste("Mean", var_name, "per year by division"))
   return(g)
 }
 
@@ -392,6 +412,22 @@ combined_census_lists_EDU
 ```
 
 ### State Plot Function Applied to EDU Data Sets
+
+```{r}
+state.plot <- function(df, var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division, year) |> 
+    summarize(mean_values = mean(get(var_name)))
+  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
+    geom_line() +
+    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
+          title = paste("Mean", var_name, "per year by division"))
+  return(g)
+}
+
+state.plot(combined_census_lists_EDU)
+```
 
 ### County Plot Function Applied to EDU Data Sets
 
