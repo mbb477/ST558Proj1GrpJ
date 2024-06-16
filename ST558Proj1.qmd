@@ -381,7 +381,7 @@ state.plot(combined_census_lists_EDU)
 
 ### Investigation of possible outlier in Middle Atlantic
 
-There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the public education enrollment for New Jersey is recorded as zero. EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that the enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number.
+There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the public education enrollment for New Jersey is recorded as zero.
 
 ```{r}
 outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |>
