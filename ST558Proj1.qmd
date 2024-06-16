@@ -379,6 +379,37 @@ state.plot <- function(df, var_name = "enrollment") {
 state.plot(combined_census_lists_EDU)
 ```
 
+### Investigate possible outlier in Middle Atlantic
+
+There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We an see that the public education enrollment for New Jersey is recorded as zero. EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document form the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number.
+
+```{r}
+outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |>
+  filter(year == 1997, division == "Middle Atlantic")
+outlier_mid_atlantic
+  
+```
+
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function. (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function, the incorrect value will be replaced using ifelse() in a mutate statement.
+
+```{r}
+#| eval: false
+state.plot <- function(df, var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    mutate(enrollment = ifelse(area_name == "NEW JERSEY" & year == 1997 & enrollment == 0, 1227832, enrollment)) |>
+    group_by(division, year) |> 
+    summarize(mean_values = mean(get(var_name)), .groups = "drop")
+  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
+    geom_line() +
+    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
+          title = paste("Mean", var_name, "per year by division"))
+  return(g)
+}
+
+state.plot(combined_census_lists_EDU)
+```
+
 ## County Plotting Function
 
 # Putting it Together (need a better name, maybe)
@@ -417,8 +448,9 @@ combined_census_lists_EDU
 state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
     filter(area_name != "UNITED STATES") |> 
+    mutate(enrollment = ifelse(area_name == "NEW JERSEY" & year == 1997 & enrollment == 0, 1227832, enrollment)) |>
     group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)))
+    summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
     labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
@@ -433,7 +465,7 @@ state.plot(combined_census_lists_EDU)
 
 ## PST Data sets
 
-### Data Processing Function Applied to  PST Data Sets
+### Data Processing Function Applied to PST Data Sets
 
 #### PST01a
 
