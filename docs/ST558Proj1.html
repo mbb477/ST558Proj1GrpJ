@@ -808,9 +808,9 @@ $noncounty_data
 <span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="investigate-possible-outlier-in-middle-atlantic" class="level3">
-<h3 class="anchored" data-anchor-id="investigate-possible-outlier-in-middle-atlantic">Investigate possible outlier in Middle Atlantic</h3>
-<p>There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We an see that the public education enrollment for New Jersey is recorded as zero. EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document form the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number.</p>
+<section id="investigation-of-possible-outlier-in-middle-atlantic" class="level3">
+<h3 class="anchored" data-anchor-id="investigation-of-possible-outlier-in-middle-atlantic">Investigation of possible outlier in Middle Atlantic</h3>
+<p>There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the public education enrollment for New Jersey is recorded as zero. EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that the enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic <span class="ot">&lt;-</span> combined_census_lists_EDU[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1997</span>, division <span class="sc">==</span> <span class="st">"Middle Atlantic"</span>)</span>
