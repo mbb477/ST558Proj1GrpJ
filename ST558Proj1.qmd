@@ -6,9 +6,11 @@ format: html
 editor: visual
 ---
 
-# Data processing first steps
+# Data processing
 
 One of the goals of this project is to create a function that can take in a URL and process and parse similar types of data sets in a specific way. The data sets we are working with are files that contain Census Bureau information.
+
+## First Steps
 
 ### Import the Data
 
@@ -26,9 +28,9 @@ read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 head(census_1a_original)
 ```
 
-### Steps 1 and 2: Select Columns and Pivot to Long Form, remove duplicate District of Columbia
+### Steps 1 and 2: Select Columns and Pivot to Long Form, Remove Duplicate District of Columbia
 
-The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns ending in "D" correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.
+The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns ending in "D" correspond to an id that identifies the type of survey and value associated with it and the 2 digit year. We also used filter() to remove duplicate District of Columbia data.
 
 ```{r}
 census_1a_condensed <- census_1a_original |>
@@ -39,23 +41,23 @@ census_1a_condensed <- census_1a_original |>
                values_to = "enrollment") |> 
   filter(area_name != "District of Columbia")
 head(census_1a_condensed) 
-view(census_1a_condensed)
+#view(census_1a_condensed)
 ```
 
 ### Step 3: Add Year and Survey Code Columns
 
-Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in it's own column. We also want to isolate and put in it's own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.
+Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in its own column. We also want to isolate and put in it's own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.
 
 ```{r}
 census_1a_add <- census_1a_condensed |>
   mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
          survey_code = substr(item_id, 1, 7))
-census_1a_add
+head(census_1a_add)
 ```
 
-### Step 4: Create Two Data Sets
+### Step 4: Create County and State Data Sets from Census Data Set
 
-In this next step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable. Specifically, we use the grepl() function to identify observations within the area_name column that contain the pattern of a comma followed by a space and then two consecutive characters, which is indicative of county level data. First, we use the filter() function to select only those rows that contain the pattern and store these in the county_data tibble. then we use filter() to select only those rows that do NOT contain the pattern, and store those in the noncounty_data tibble. From here, we also assign a "county" or "non-county" class to each new data set.
+In this next step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable. Specifically, we use the grepl() function to identify observations within the area_name column that contain the pattern of a comma followed by a space and then two consecutive characters, which is indicative of county level data. First, we use the filter() function to select only those rows that contain the pattern and store these in the county_data tibble. then we use filter() to select only those rows that do NOT contain the pattern, and store those in the noncounty_data tibble. From here, we also assign a "county" or "state" class to each new data set.
 
 ```{r}
 county_data <- census_1a_add |>
@@ -79,7 +81,7 @@ Within the county data set, we now return to using substr() to extract the last 
 county_data <- county_data |>
   mutate(state = substr(area_name, nchar(area_name)-1,
                         nchar(area_name)))
-county_data
+head(county_data)
 ```
 
 ### Step 6: Add New Variable for Non-County Data
@@ -119,10 +121,10 @@ noncounty_data <- noncounty_data |>
                     "ALASKA", "CALIFORNIA", "HAWAII", "OREGON",
                     "WASHINGTON"), "Pacific", 
                   "ERROR"))))))))))
-noncounty_data
+head(noncounty_data)
 ```
 
-# Data processing function creation
+## Data processing function creation
 
 We now turn to a second data set EDU01b, which contains data structured similarly to EDU01a, with measurements from areas of the country taken across different years. In the steps below, we will recreate the steps above for this new data, but rather than simply copying code and modifying to apply to this one new data set, we will create functions that can apply the same set of steps to any similar data set.
 
@@ -285,7 +287,7 @@ census_df_list_EDU01a
 census_df_list_EDU01b
 ```
 
-### Data Combining Function
+## Data Combining Function
 
 In this final step for preparing the data, we create a function that takes in the results of two calls of the wrapper function and combines them. Specifically, we use the bind_rows function to append the rows of two like tibbles together, resulting in two new comprehensive tibbles (one for county and one for state data). These are output into a single list object.
 
@@ -330,7 +332,7 @@ result <- combined_census_lists_EDU[[2]] |>
 result
 ```
 
-incorporate var_name in the plot function,
+incorporate var_name in the mean call
 
 ```{r}
 state.plot <- function(df, var_name = "enrollment") {
@@ -360,28 +362,26 @@ state.plot(combined_census_lists_EDU)
 
 add layers
 
-need to add "mean" so that y-axis is "mean enrollment", maybe capitalize labels
-
 ```{r}
 #| eval: false
 state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
     filter(area_name != "UNITED STATES") |> 
     group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)))
+    summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
-    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
-          title = paste("Mean", var_name, "per year by division"))
+    labs (x = "Year", y = str_to_title(paste("mean", var_name)), color = "Division", 
+          title = str_to_title(paste("mean", var_name, "per year by division")))
   return(g)
 }
 
 state.plot(combined_census_lists_EDU)
 ```
 
-### Investigation of possible outlier in Middle Atlantic
+### Investigation of Possible Outlier in Middle Atlantic
 
-There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the public education enrollment for New Jersey is recorded as zero.
+There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the enrollment for New Jersey is recorded as zero.
 
 ```{r}
 outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |>
@@ -390,7 +390,7 @@ outlier_mid_atlantic
   
 ```
 
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function. (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function, the incorrect value will be replaced using ifelse() in a mutate statement.
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function. (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function presented below, the incorrect value is replaced using ifelse() in a mutate statement.
 
 ```{r}
 #| eval: false
@@ -402,8 +402,9 @@ state.plot <- function(df, var_name = "enrollment") {
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
-    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
-          title = paste("Mean", var_name, "per year by division"))
+    labs (x = "Year", y = str_to_title(paste("mean", var_name)), 
+          color = "Division", 
+          title = str_to_title(paste("mean", var_name, "per year by division")))
   return(g)
 }
 
@@ -444,6 +445,26 @@ combined_census_lists_EDU
 
 ### State Plot Function Applied to EDU Data Sets
 
+#### With Outlier
+
+```{r}
+state.plot <- function(df, var_name = "enrollment") {
+  result <- df[[2]] |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division, year) |> 
+    summarize(mean_values = mean(get(var_name)), .groups = "drop")
+  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
+    geom_line() +
+    labs (x = "Year", y = str_to_title(paste("mean", var_name)), color = "Division", 
+          title = str_to_title(paste("mean", var_name, "per year by division")))
+  return(g)
+}
+
+state.plot(combined_census_lists_EDU)
+```
+
+#### With Outlier Replaced
+
 ```{r}
 state.plot <- function(df, var_name = "enrollment") {
   result <- df[[2]] |>
@@ -453,8 +474,9 @@ state.plot <- function(df, var_name = "enrollment") {
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
-    labs (x = "Year", y = paste("Mean", var_name), color = "Division", 
-          title = paste("Mean", var_name, "per year by division"))
+    labs (x = "Year", y = str_to_title(paste("mean", var_name)), 
+          color = "Division", 
+          title = str_to_title(paste("mean", var_name, "per year by division")))
   return(g)
 }
 

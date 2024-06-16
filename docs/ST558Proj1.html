@@ -147,9 +147,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="data-processing-first-steps" class="level1">
-<h1>Data processing first steps</h1>
+<section id="data-processing" class="level1">
+<h1>Data processing</h1>
 <p>One of the goals of this project is to create a function that can take in a URL and process and parse similar types of data sets in a specific way. The data sets we are working with are files that contain Census Bureau information.</p>
+<section id="first-steps" class="level2">
+<h2 class="anchored" data-anchor-id="first-steps">First Steps</h2>
 <section id="import-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="import-the-data">Import the Data</h3>
 <p>We will start with the EDU01a data set and use it to outline the steps that will be necessary to create our wrapper function. To begin, the appropriate packages are loaded and the data imported using read_csv. This function is appropriate for csv files. The data already contains column names, which is the default for this function, so it is not necessary to specify an argument regarding column names.</p>
@@ -190,8 +192,8 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 </div>
 </section>
 <section id="steps-1-and-2-select-columns-and-pivot-to-long-form-remove-duplicate-district-of-columbia" class="level3">
-<h3 class="anchored" data-anchor-id="steps-1-and-2-select-columns-and-pivot-to-long-form-remove-duplicate-district-of-columbia">Steps 1 and 2: Select Columns and Pivot to Long Form, remove duplicate District of Columbia</h3>
-<p>The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a “D”. These columns ending in “D” correspond to an id that identifies the type of survey and value associated with it and the 2 digit year.</p>
+<h3 class="anchored" data-anchor-id="steps-1-and-2-select-columns-and-pivot-to-long-form-remove-duplicate-district-of-columbia">Steps 1 and 2: Select Columns and Pivot to Long Form, Remove Duplicate District of Columbia</h3>
+<p>The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a “D”. These columns ending in “D” correspond to an id that identifies the type of survey and value associated with it and the 2 digit year. We also used filter() to remove duplicate District of Columbia data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>census_1a_condensed <span class="ot">&lt;-</span> census_1a_original <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Area_name, STCOU, <span class="fu">ends_with</span>(<span class="st">"D"</span>)) <span class="sc">|&gt;</span></span>
@@ -212,38 +214,33 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 5 UNITED STATES 00000 EDU010191D   41385442
 6 UNITED STATES 00000 EDU010192D   42088151</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(census_1a_condensed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#view(census_1a_condensed)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="step-3-add-year-and-survey-code-columns" class="level3">
 <h3 class="anchored" data-anchor-id="step-3-add-year-and-survey-code-columns">Step 3: Add Year and Survey Code Columns</h3>
-<p>Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in it’s own column. We also want to isolate and put in it’s own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.</p>
+<p>Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in its own column. We also want to isolate and put in it’s own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>census_1a_add <span class="ot">&lt;-</span> census_1a_condensed <span class="sc">|&gt;</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> (<span class="fu">as.numeric</span>(<span class="fu">substr</span>(item_id, <span class="dv">8</span>, <span class="dv">9</span>)) <span class="sc">+</span> <span class="dv">1900</span>),</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">survey_code =</span> <span class="fu">substr</span>(item_id, <span class="dv">1</span>, <span class="dv">7</span>))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>census_1a_add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(census_1a_add)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 31,970 × 6
-   area_name     STCOU item_id    enrollment  year survey_code
-   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
- 1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101    
- 2 UNITED STATES 00000 EDU010188D   39967624  1988 EDU0101    
- 3 UNITED STATES 00000 EDU010189D   40317775  1989 EDU0101    
- 4 UNITED STATES 00000 EDU010190D   40737600  1990 EDU0101    
- 5 UNITED STATES 00000 EDU010191D   41385442  1991 EDU0101    
- 6 UNITED STATES 00000 EDU010192D   42088151  1992 EDU0101    
- 7 UNITED STATES 00000 EDU010193D   42724710  1993 EDU0101    
- 8 UNITED STATES 00000 EDU010194D   43369917  1994 EDU0101    
- 9 UNITED STATES 00000 EDU010195D   43993459  1995 EDU0101    
-10 UNITED STATES 00000 EDU010196D   44715737  1996 EDU0101    
-# ℹ 31,960 more rows</code></pre>
+<pre><code># A tibble: 6 × 6
+  area_name     STCOU item_id    enrollment  year survey_code
+  &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      
+1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101    
+2 UNITED STATES 00000 EDU010188D   39967624  1988 EDU0101    
+3 UNITED STATES 00000 EDU010189D   40317775  1989 EDU0101    
+4 UNITED STATES 00000 EDU010190D   40737600  1990 EDU0101    
+5 UNITED STATES 00000 EDU010191D   41385442  1991 EDU0101    
+6 UNITED STATES 00000 EDU010192D   42088151  1992 EDU0101    </code></pre>
 </div>
 </div>
 </section>
-<section id="step-4-create-two-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-create-two-data-sets">Step 4: Create Two Data Sets</h3>
-<p>In this next step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable. Specifically, we use the grepl() function to identify observations within the area_name column that contain the pattern of a comma followed by a space and then two consecutive characters, which is indicative of county level data. First, we use the filter() function to select only those rows that contain the pattern and store these in the county_data tibble. then we use filter() to select only those rows that do NOT contain the pattern, and store those in the noncounty_data tibble. From here, we also assign a “county” or “non-county” class to each new data set.</p>
+<section id="step-4-create-county-and-state-data-sets-from-census-data-set" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-create-county-and-state-data-sets-from-census-data-set">Step 4: Create County and State Data Sets from Census Data Set</h3>
+<p>In this next step, we separate the observations into two data sets based on the presence or absence of a character string pattern in the area_name variable. Specifically, we use the grepl() function to identify observations within the area_name column that contain the pattern of a comma followed by a space and then two consecutive characters, which is indicative of county level data. First, we use the filter() function to select only those rows that contain the pattern and store these in the county_data tibble. then we use filter() to select only those rows that do NOT contain the pattern, and store those in the noncounty_data tibble. From here, we also assign a “county” or “state” class to each new data set.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>county_data <span class="ot">&lt;-</span> census_1a_add <span class="sc">|&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">", </span><span class="sc">\\</span><span class="st">w</span><span class="sc">\\</span><span class="st">w"</span>, area_name))</span>
@@ -287,22 +284,17 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>county_data <span class="ot">&lt;-</span> county_data <span class="sc">|&gt;</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">state =</span> <span class="fu">substr</span>(area_name, <span class="fu">nchar</span>(area_name)<span class="sc">-</span><span class="dv">1</span>,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">nchar</span>(area_name)))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>county_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(county_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 31,450 × 7
-   area_name   STCOU item_id    enrollment  year survey_code state
-   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;
- 1 Autauga, AL 01001 EDU010187D       6829  1987 EDU0101     AL   
- 2 Autauga, AL 01001 EDU010188D       6900  1988 EDU0101     AL   
- 3 Autauga, AL 01001 EDU010189D       6920  1989 EDU0101     AL   
- 4 Autauga, AL 01001 EDU010190D       6847  1990 EDU0101     AL   
- 5 Autauga, AL 01001 EDU010191D       7008  1991 EDU0101     AL   
- 6 Autauga, AL 01001 EDU010192D       7137  1992 EDU0101     AL   
- 7 Autauga, AL 01001 EDU010193D       7152  1993 EDU0101     AL   
- 8 Autauga, AL 01001 EDU010194D       7381  1994 EDU0101     AL   
- 9 Autauga, AL 01001 EDU010195D       7568  1995 EDU0101     AL   
-10 Autauga, AL 01001 EDU010196D       7834  1996 EDU0101     AL   
-# ℹ 31,440 more rows</code></pre>
+<pre><code># A tibble: 6 × 7
+  area_name   STCOU item_id    enrollment  year survey_code state
+  &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;
+1 Autauga, AL 01001 EDU010187D       6829  1987 EDU0101     AL   
+2 Autauga, AL 01001 EDU010188D       6900  1988 EDU0101     AL   
+3 Autauga, AL 01001 EDU010189D       6920  1989 EDU0101     AL   
+4 Autauga, AL 01001 EDU010190D       6847  1990 EDU0101     AL   
+5 Autauga, AL 01001 EDU010191D       7008  1991 EDU0101     AL   
+6 Autauga, AL 01001 EDU010192D       7137  1992 EDU0101     AL   </code></pre>
 </div>
 </div>
 </section>
@@ -342,28 +334,23 @@ dbl (20): EDU010187F, EDU010187D, EDU010188F, EDU010188D, EDU010189F, EDU010...
 <span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ALASKA"</span>, <span class="st">"CALIFORNIA"</span>, <span class="st">"HAWAII"</span>, <span class="st">"OREGON"</span>,</span>
 <span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"WASHINGTON"</span>), <span class="st">"Pacific"</span>, </span>
 <span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ERROR"</span>))))))))))</span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>noncounty_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(noncounty_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 520 × 7
-   area_name     STCOU item_id    enrollment  year survey_code division
-   &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;   
- 1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101     ERROR   
- 2 UNITED STATES 00000 EDU010188D   39967624  1988 EDU0101     ERROR   
- 3 UNITED STATES 00000 EDU010189D   40317775  1989 EDU0101     ERROR   
- 4 UNITED STATES 00000 EDU010190D   40737600  1990 EDU0101     ERROR   
- 5 UNITED STATES 00000 EDU010191D   41385442  1991 EDU0101     ERROR   
- 6 UNITED STATES 00000 EDU010192D   42088151  1992 EDU0101     ERROR   
- 7 UNITED STATES 00000 EDU010193D   42724710  1993 EDU0101     ERROR   
- 8 UNITED STATES 00000 EDU010194D   43369917  1994 EDU0101     ERROR   
- 9 UNITED STATES 00000 EDU010195D   43993459  1995 EDU0101     ERROR   
-10 UNITED STATES 00000 EDU010196D   44715737  1996 EDU0101     ERROR   
-# ℹ 510 more rows</code></pre>
+<pre><code># A tibble: 6 × 7
+  area_name     STCOU item_id    enrollment  year survey_code division
+  &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;   
+1 UNITED STATES 00000 EDU010187D   40024299  1987 EDU0101     ERROR   
+2 UNITED STATES 00000 EDU010188D   39967624  1988 EDU0101     ERROR   
+3 UNITED STATES 00000 EDU010189D   40317775  1989 EDU0101     ERROR   
+4 UNITED STATES 00000 EDU010190D   40737600  1990 EDU0101     ERROR   
+5 UNITED STATES 00000 EDU010191D   41385442  1991 EDU0101     ERROR   
+6 UNITED STATES 00000 EDU010192D   42088151  1992 EDU0101     ERROR   </code></pre>
 </div>
 </div>
 </section>
 </section>
-<section id="data-processing-function-creation" class="level1">
-<h1>Data processing function creation</h1>
+<section id="data-processing-function-creation" class="level2">
+<h2 class="anchored" data-anchor-id="data-processing-function-creation">Data processing function creation</h2>
 <p>We now turn to a second data set EDU01b, which contains data structured similarly to EDU01a, with measurements from areas of the country taken across different years. In the steps below, we will recreate the steps above for this new data, but rather than simply copying code and modifying to apply to this one new data set, we will create functions that can apply the same set of steps to any similar data set.</p>
 <section id="import-the-data-1" class="level3">
 <h3 class="anchored" data-anchor-id="import-the-data-1">Import the data</h3>
@@ -626,8 +613,9 @@ $noncounty_data
 </div>
 </div>
 </section>
-<section id="data-combining-function" class="level3">
-<h3 class="anchored" data-anchor-id="data-combining-function">Data Combining Function</h3>
+</section>
+<section id="data-combining-function" class="level2">
+<h2 class="anchored" data-anchor-id="data-combining-function">Data Combining Function</h2>
 <p>In this final step for preparing the data, we create a function that takes in the results of two calls of the wrapper function and combines them. Specifically, we use the bind_rows function to append the rows of two like tibbles together, resulting in two new comprehensive tibbles (one for county and one for state data). These are output into a single list object.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>combine_census_lists <span class="ot">&lt;-</span> <span class="cf">function</span>(list1, list2) {</span>
@@ -735,7 +723,7 @@ $noncounty_data
 # ℹ 170 more rows</code></pre>
 </div>
 </div>
-<p>incorporate var_name in the plot function,</p>
+<p>incorporate var_name in the mean call</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
@@ -792,25 +780,24 @@ $noncounty_data
 </div>
 </div>
 <p>add layers</p>
-<p>need to add “mean” so that y-axis is “mean enrollment”, maybe capitalize labels</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(area_name <span class="sc">!=</span> <span class="st">"UNITED STATES"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(division, year) <span class="sc">|&gt;</span> </span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)))</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
 <span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name, <span class="st">"per year by division"</span>))</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
 <span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
 <span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="investigation-of-possible-outlier-in-middle-atlantic" class="level3">
-<h3 class="anchored" data-anchor-id="investigation-of-possible-outlier-in-middle-atlantic">Investigation of possible outlier in Middle Atlantic</h3>
-<p>There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the public education enrollment for New Jersey is recorded as zero.</p>
+<h3 class="anchored" data-anchor-id="investigation-of-possible-outlier-in-middle-atlantic">Investigation of Possible Outlier in Middle Atlantic</h3>
+<p>There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the enrollment for New Jersey is recorded as zero.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic <span class="ot">&lt;-</span> combined_census_lists_EDU[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1997</span>, division <span class="sc">==</span> <span class="st">"Middle Atlantic"</span>)</span>
@@ -824,7 +811,7 @@ $noncounty_data
 3 PENNSYLVANIA 42000 EDU010197D    1804256  1997 EDU0101     Middle Atlantic</code></pre>
 </div>
 </div>
-<p>EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function. (<a href="https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf" class="uri">https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf</a>). In the new plot function, the incorrect value will be replaced using ifelse() in a mutate statement.</p>
+<p>EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function. (<a href="https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf" class="uri">https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf</a>). In the new plot function presented below, the incorrect value is replaced using ifelse() in a mutate statement.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
@@ -834,12 +821,13 @@ $noncounty_data
 <span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
 <span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name, <span class="st">"per year by division"</span>))</span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), </span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"Division"</span>, </span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -999,21 +987,22 @@ $noncounty_data
 </section>
 <section id="state-plot-function-applied-to-edu-data-sets" class="level3">
 <h3 class="anchored" data-anchor-id="state-plot-function-applied-to-edu-data-sets">State Plot Function Applied to EDU Data Sets</h3>
+<section id="with-outlier" class="level4">
+<h4 class="anchored" data-anchor-id="with-outlier">With Outlier</h4>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(area_name <span class="sc">!=</span> <span class="st">"UNITED STATES"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">enrollment =</span> <span class="fu">ifelse</span>(area_name <span class="sc">==</span> <span class="st">"NEW JERSEY"</span> <span class="sc">&amp;</span> year <span class="sc">==</span> <span class="dv">1997</span> <span class="sc">&amp;</span> enrollment <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1227832</span>, enrollment)) <span class="sc">|&gt;</span></span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(division, year) <span class="sc">|&gt;</span> </span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
-<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
-<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Mean"</span>, var_name, <span class="st">"per year by division"</span>))</span>
-<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
-<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(division, year) <span class="sc">|&gt;</span> </span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1022,6 +1011,34 @@ $noncounty_data
 </div>
 </div>
 </div>
+</section>
+<section id="with-outlier-replaced" class="level4">
+<h4 class="anchored" data-anchor-id="with-outlier-replaced">With Outlier Replaced</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>state.plot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> df[[<span class="dv">2</span>]] <span class="sc">|&gt;</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(area_name <span class="sc">!=</span> <span class="st">"UNITED STATES"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">enrollment =</span> <span class="fu">ifelse</span>(area_name <span class="sc">==</span> <span class="st">"NEW JERSEY"</span> <span class="sc">&amp;</span> year <span class="sc">==</span> <span class="dv">1997</span> <span class="sc">&amp;</span> enrollment <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1227832</span>, enrollment)) <span class="sc">|&gt;</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(division, year) <span class="sc">|&gt;</span> </span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), </span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"Division"</span>, </span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a><span class="fu">state.plot</span>(combined_census_lists_EDU)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ST558Proj1_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="county-plot-function-applied-to-edu-data-sets" class="level3">
 <h3 class="anchored" data-anchor-id="county-plot-function-applied-to-edu-data-sets">County Plot Function Applied to EDU Data Sets</h3>
