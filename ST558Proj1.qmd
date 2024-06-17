@@ -342,17 +342,23 @@ outlier_mid_atlantic
   
 ```
 
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function presented below, the incorrect value is replaced using ifelse() in a mutate statement.
-
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced in the original combined data set using ifelse() in a mutate statement.
 
 ```{r}
-#NEED TO CHANGE THIS TO NOT USE ENROLLMENT IN MUTATE and instead assign
-#dynamically
+combined_census_lists_EDU_modified <- combined_census_lists_EDU
+combined_census_lists_EDU_modified$noncounty_data <-
+  combined_census_lists_EDU_modified$noncounty_data |>
+  mutate(enrollment = 
+           ifelse(area_name == "NEW JERSEY" & year == 1997 & 
+                    enrollment == 0, 1227832, enrollment))
+#verify change
+combined_census_lists_EDU_modified[[2]] |>
+  filter(year == 1997, division == "Middle Atlantic")
+  
 state.plot <- function(df, var_name = "enrollment") {
   result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
-    mutate(enrollment = ifelse(area_name == "NEW JERSEY" & year == 1997 & enrollment == 0, 1227832, enrollment)) |>
-    group_by(division, year) |> 
+        group_by(division, year) |> 
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
@@ -362,7 +368,7 @@ state.plot <- function(df, var_name = "enrollment") {
   return(g)
 }
 
-#state.plot(combined_census_lists_EDU)
+#state.plot(combined_census_lists_EDU_modified)
 ```
 
 ## County Plotting Function
@@ -436,25 +442,13 @@ combined_census_lists_EDU
 #### EDU State Plot With Outlier
 
 ```{r}
-state.plot.outlier <- function(df, var_name = "enrollment") {
-  result <- df$noncounty_data |>
-    filter(area_name != "UNITED STATES") |> 
-    group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)), .groups = "drop")
-  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
-    geom_line() +
-    labs (x = "Year", y = str_to_title(paste("mean", var_name)), color = "Division", 
-          title = str_to_title(paste("mean", var_name, "per year by division")))
-  return(g)
-}
-
-state.plot.outlier(combined_census_lists_EDU)
+state.plot(combined_census_lists_EDU)
 ```
 
 #### EDU State Plot With Outlier Replaced
 
 ```{r}
-state.plot(combined_census_lists_EDU)
+state.plot(combined_census_lists_EDU_modified)
 ```
 
 ### County Plot Function Applied to EDU Data Sets
@@ -526,7 +520,6 @@ combined_census_lists_PST <-
 combined_census_lists_PST
 ```
 
-
 ### State Plot Function Applied to PST Data Sets
 
 ```{r}
@@ -544,6 +537,5 @@ state.plot <- function(df, var_name = "population") {
 }
 state.plot(combined_census_lists_PST)
 ```
-
 
 ### County Plot Function Applied to PST Data Sets
