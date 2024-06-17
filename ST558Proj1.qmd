@@ -414,9 +414,10 @@ state.plot(combined_census_lists_EDU)
 ## County Plotting Function
 
 For county plotting, we will create a function that takes in the data frame, a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. First, we test the ability for our function to identify these counties and output their names. 
+
 ```{r}
 
-county.plot <- function(census_df, var_name = "enrollment", 
+plot.county <- function(census_df, var_name = "enrollment", 
                         select_state = "NC", sort = "top", x = 5){
 result <- census_df$county_data |>
     filter(state == select_state) |>
@@ -424,21 +425,28 @@ result <- census_df$county_data |>
      summarize(mean_values = mean(get(var_name)))
 
 if(sort %in% c("top")){
-    result <- result |>
+    county_names <- result |>
       arrange(desc(mean_values)) |>
       slice_head(n=x)
   } else {
-      result <- result |>
+      county_names <- result |>
         arrange(mean_values) |>
         slice_head(n=x)
   }
+output <- census_df$county_data |>
+  filter(state == select_state, 
+         area_name %in% county_names$area_name)
+
+ggplot(output, aes(x = year, y = enrollment, color = area_name)) +
+    geom_line() +
+    labs (x = "Year", y = str_to_title(var_name), 
+          color = "County", 
+          title = str_to_title(paste(var_name, "per year for", sort, x, "counties")))
 }
-result <- county.plot(combined_census_lists_EDU, sort = "bottom", x=10)
-result
+
+plot.county(combined_census_lists_EDU, sort = "bottom", x=5)
 
 ```
-
-
 
 # Putting it Together (need a better name, maybe)
 
