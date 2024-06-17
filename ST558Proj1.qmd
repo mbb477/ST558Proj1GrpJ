@@ -273,7 +273,7 @@ data_processing_wrapper <- function(url, default_var_name = "enrollment") {
 
 ### Calling the Functions
 
-Now, we call our function twice, once for data set censusEDU01a and again for EDU01a and again for EDU01b, which will create two lists, each containing two tibbles (one for county and one for non-county data).
+Now, we call our function twice, once for data set EDU01a and again for EDU01b, which will create two lists, each containing two tibbles (one for county and one for non-county data).
 
 ```{r}
 
@@ -306,66 +306,18 @@ combined_census_lists_EDU
 
 # Generic Summarizing Functions
 
-The goal of this section is to create two functions that will take in combined data sets (as a list) from our data combining function and create plots for county and non-county (state) data. Details of this functions will be provided in subsequent sections.
+The goal of this section is to create two functions that will take in combined data sets (as a list) from our data combining function and create plots for county and non-county (state) data. Details of these functions are provided in subsequent sections.
 
 ## State Plotting Function
 
-For the state plotting function, we want to create a function that will take in our combined census data sets and our default variable as arguments and outputs a plot of year versus the mean of of the default variable for each division. To accomplish this, we first need to do some manipulation with our tibble. First, we isolate the proper tibble from the list using \[\[\]\]. Since the United States is not a division and has "ERROR" in the division column, we need to filter to remove those rows. Finally we can group by year and division to so that the appropriate means are calculated. To calculate a mean for each year and division combination, we use summarize and reference our default variable name for the mean function.
+For the state plotting function, we want to create a function that will take in our combined census data sets and our default variable as arguments and returns a plot of year versus the mean of the default variable for each division. To accomplish this, we first need to do some manipulation with our tibble. First, we isolate the proper tibble from the list using \$noncounty_data. Since the United States is not a division and has "ERROR" in the division column, we need to filter to remove those rows. Finally we can group by year and division to so that the appropriate means are calculated. To calculate a mean for each year and division combination, we use summarize and reference our default variable name for the mean function.
 
-Now that our data is in the proper form and summary statistics obtained, we can create our line plot. We use ggplot to create a plot instance. The plot instance needs two arguments, one specifying our data and an aesthetic (aes) mapping argument. The aes mapping defines the x and y axis variables, as well as mapping for division so the plot assigns a different color and line to each division. Next we add layers. Since we want a line connecting years for each division, we use geom_line. We chose to leave the defaults in place so no arguments are specified. A labs layer was then added to modify some labels. The x-axis and legend labels are capitalized and the title and axis label specified in a way that will allow the names to change dynamically according to the default variable name used when calling the function.
-
-```{r}
-#view(combined_census_lists_EDU[[2]])
-result <- combined_census_lists_EDU[[2]] |>
-  filter(area_name != "UNITED STATES") |> 
-  group_by(division, year)
-result
-```
-
-check summarize and groupings
-
-```{r}
-result <- combined_census_lists_EDU[[2]] |>
-  filter(area_name != "UNITED STATES") |> 
-  group_by(division, year) |>
-  summarize(mean_enrollment = mean(enrollment))
-result
-```
-
-incorporate var_name in the mean call
-
-```{r}
-state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
-    filter(area_name != "UNITED STATES") |> 
-    group_by(division, year) |> 
-    summarize(mean(get(var_name)))
-             return(result)
-}
-state.plot(combined_census_lists_EDU)
-```
-
-add plot instance
-
-```{r}
-state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
-    filter(area_name != "UNITED STATES") |> 
-    group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)))
-  g <- ggplot(result, aes(x = year, y = mean_values))
-  return(g)
-}
-
-state.plot(combined_census_lists_EDU)
-```
-
-add layers
+After putting our data in the proper form and obtaining means, we can create our line plot. We use ggplot to create a plot instance. The plot instance needs two arguments, one specifying our data and the ohter an aesthetic (aes) mapping argument. The aes mapping defines the x and y axis variables, as well as mapping for division so the plot assigns a different color and line to each division. Next we add layers. Since we want a line connecting years for each division, we use geom_line. We chose to leave the defaults in place so no arguments are specified. A labs layer was then added to modify some labels. The axes and legend labels are capitalized and the title and y-axis label specified in a way that will allow the names to change dynamically according to the default variable name used when calling the function.
 
 ```{r}
 #| eval: false
 state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
+  result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
     group_by(division, year) |> 
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
@@ -390,12 +342,14 @@ outlier_mid_atlantic
   
 ```
 
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function. (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function presented below, the incorrect value is replaced using ifelse() in a mutate statement.
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). In the new plot function presented below, the incorrect value is replaced using ifelse() in a mutate statement.
+
 
 ```{r}
-#| eval: false
+#NEED TO CHANGE THIS TO NOT USE ENROLLMENT IN MUTATE and instead assign
+#dynamically
 state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
+  result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
     mutate(enrollment = ifelse(area_name == "NEW JERSEY" & year == 1997 & enrollment == 0, 1227832, enrollment)) |>
     group_by(division, year) |> 
@@ -408,15 +362,14 @@ state.plot <- function(df, var_name = "enrollment") {
   return(g)
 }
 
-state.plot(combined_census_lists_EDU)
+#state.plot(combined_census_lists_EDU)
 ```
 
 ## County Plotting Function
 
-For county plotting, we will create a function that takes in the data frame, a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. First, we test the ability for our function to identify these counties and output their names. 
+For county plotting, we will create a function that takes in the data frame, a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. First, we test the ability for our function to identify these counties and output their names.
 
 ```{r}
-
 plot.county <- function(census_df, var_name = "enrollment", 
                         select_state = "NC", sort = "top", x = 5){
 result <- census_df$county_data |>
@@ -437,7 +390,7 @@ output <- census_df$county_data |>
   filter(state == select_state, 
          area_name %in% county_names$area_name)
 
-ggplot(output, aes(x = year, y = enrollment, color = area_name)) +
+ggplot(output, aes(x = year, y = get(var_name), color = area_name)) +
     geom_line() +
     labs (x = "Year", y = str_to_title(var_name), 
           color = "County", 
@@ -480,11 +433,11 @@ combined_census_lists_EDU
 
 ### State Plot Function Applied to EDU Data Sets
 
-#### With Outlier
+#### EDU State Plot With Outlier
 
 ```{r}
-state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
+state.plot.outlier <- function(df, var_name = "enrollment") {
+  result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
     group_by(division, year) |> 
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
@@ -495,16 +448,91 @@ state.plot <- function(df, var_name = "enrollment") {
   return(g)
 }
 
+state.plot.outlier(combined_census_lists_EDU)
+```
+
+#### EDU State Plot With Outlier Replaced
+
+```{r}
 state.plot(combined_census_lists_EDU)
 ```
 
-#### With Outlier Replaced
+### County Plot Function Applied to EDU Data Sets
 
 ```{r}
-state.plot <- function(df, var_name = "enrollment") {
-  result <- df[[2]] |>
+
+```
+
+## PST Data sets
+
+### Data Processing Function Applied to PST Data Sets
+
+#### PST01a
+
+```{r}
+census_df_list_PST01a <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", "population")
+census_df_list_PST01a
+```
+
+#### PST01b
+
+```{r}
+census_df_list_PST01b <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", "population")
+census_df_list_PST01b
+```
+
+#### PST01c
+
+```{r}
+census_df_list_PST01c <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", "population")
+census_df_list_PST01c
+```
+
+#### PST01d
+
+```{r}
+census_df_list_PST01d <- 
+  data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", "population")
+census_df_list_PST01d
+```
+
+### Data Combining Function Applied to PST Data Sets
+
+#### Combining PST01a and PST01b
+
+```{r}
+combined_census_lists_PST_1a_1b <- combine_census_lists(census_df_list_PST01a, 
+                                                        census_df_list_PST01b)
+combined_census_lists_PST_1a_1b
+
+```
+
+#### Combining PST01c to PST1a/1b
+
+```{r}
+combined_census_lists_PST_1a_1b_1c <- 
+  combine_census_lists(combined_census_lists_PST_1a_1b, census_df_list_PST01c)
+combined_census_lists_PST_1a_1b_1c
+```
+
+#### Full Combined PST list
+
+```{r}
+combined_census_lists_PST <- 
+  combine_census_lists(combined_census_lists_PST_1a_1b_1c, census_df_list_PST01d)
+combined_census_lists_PST
+```
+
+
+### State Plot Function Applied to PST Data Sets
+
+```{r}
+state.plot <- function(df, var_name = "population") {
+  result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
-    mutate(enrollment = ifelse(area_name == "NEW JERSEY" & year == 1997 & enrollment == 0, 1227832, enrollment)) |>
     group_by(division, year) |> 
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
@@ -514,26 +542,8 @@ state.plot <- function(df, var_name = "enrollment") {
           title = str_to_title(paste("mean", var_name, "per year by division")))
   return(g)
 }
-
-state.plot(combined_census_lists_EDU)
+state.plot(combined_census_lists_PST)
 ```
 
-### County Plot Function Applied to EDU Data Sets
-
-## PST Data sets
-
-### Data Processing Function Applied to PST Data Sets
-
-#### PST01a
-
-#### PST01b
-
-#### PST01c
-
-#### PST01d
-
-### Data Combining Function Applied to PST Data Sets
-
-### State Plot Function Applied to PST Data Sets
 
 ### County Plot Function Applied to PST Data Sets
