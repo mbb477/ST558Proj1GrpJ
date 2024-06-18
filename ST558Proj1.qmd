@@ -315,7 +315,6 @@ For the state plotting function, we want to create a function that will take in 
 After putting our data in the proper form and obtaining means, we can create our line plot. We use ggplot to create a plot instance. The plot instance needs two arguments, one specifying our data and the ohter an aesthetic (aes) mapping argument. The aes mapping defines the x and y axis variables, as well as mapping for division so the plot assigns a different color and line to each division. Next we add layers. Since we want a line connecting years for each division, we use geom_line. We chose to leave the defaults in place so no arguments are specified. A labs layer was then added to modify some labels. The axes and legend labels are capitalized and the title and y-axis label specified in a way that will allow the names to change dynamically according to the default variable name used when calling the function.
 
 ```{r}
-#| eval: false
 state.plot <- function(df, var_name = "enrollment") {
   result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
@@ -325,41 +324,6 @@ state.plot <- function(df, var_name = "enrollment") {
     geom_line() +
     labs (x = "Year", y = str_to_title(paste("mean", var_name)), color = "Division", 
           title = str_to_title(paste("mean", var_name, "per year by division")))
-  return(g)
-}
-
-state.plot(combined_census_lists_EDU)
-```
-
-### Investigation of Possible Outlier in Middle Atlantic
-
-There is a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the enrollment for New Jersey is recorded as zero.
-
-```{r}
-outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |>
-  filter(year == 1997, division == "Middle Atlantic")
-outlier_mid_atlantic
-  
-```
-
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced using ifelse() in a mutate statement.
-
-```{r}
-state.plot <- function(df, var_name = "enrollment") {
-  result <- df$noncounty_data |>
-    filter(area_name != "UNITED STATES") |> 
-    mutate({{ var_name }} := ifelse(area_name == "NEW JERSEY" & year == 1997 &  
-                                      get(var_name) == 0, 1227832, 
-                                    get(var_name))) |>
-    group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)), .groups = "drop")
-  
-  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
-    geom_line() +
-    labs(x = "Year", y = str_to_title(paste("Mean", var_name)), 
-         color = "Division", 
-         title = str_to_title(paste("Mean", var_name, "per year by division")))
-  
   return(g)
 }
 
@@ -449,30 +413,37 @@ combined_census_lists_EDU <-
 
 ### State Plot Function Applied to EDU Data Sets
 
-#### EDU State Plot With Outlier
+#### EDU State Plot With Possible Outlier
 
 ```{r}
-state.plot.outlier <- function(df, var_name = "enrollment") {
-  result <- df$noncounty_data |>
-    filter(area_name != "UNITED STATES") |> 
-    group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)), .groups = "drop")
-  
-  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
-    geom_line() +
-    labs(x = "Year", y = str_to_title(paste("Mean", var_name)), 
-         color = "Division", 
-         title = str_to_title(paste("Mean", var_name, "per year by division")))
-  
-  return(g)
-}
-state.plot.outlier(combined_census_lists_EDU)
+state.plot(combined_census_lists_EDU)
+```
+
+Looking at the plot above, we see a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the enrollment for New Jersey is recorded as zero.
+
+```{r}
+outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |> filter(year == 1997, division == "Middle Atlantic") 
+outlier_mid_atlantic
+```
+
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced in the original combined list using ifelse() in a mutate statement.
+
+```{r}
+combined_census_lists_EDU_modified <- combined_census_lists_EDU
+combined_census_lists_EDU_modified$noncounty_data <-
+  combined_census_lists_EDU_modified$noncounty_data |>
+  mutate(enrollment = 
+           ifelse(area_name == "NEW JERSEY" & year == 1997 & 
+                    enrollment == 0, 1227832, enrollment))
+#verify change
+combined_census_lists_EDU_modified[[2]] |>
+  filter(year == 1997, division == "Middle Atlantic")
 ```
 
 #### EDU State Plot With Outlier Replaced
 
 ```{r}
-state.plot(combined_census_lists_EDU)
+state.plot(combined_census_lists_EDU_modified)
 ```
 
 ### County Plot Function Applied to EDU Data Sets
@@ -600,4 +571,39 @@ plot.county(combined_census_lists_PST, var_name = "population")
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "NY", x=10)
+```
+
+It looks like there may be some outliers in this data. We will investigate by filtering data for the counties of Kings, Queens and Bronx in 1992. We can see that the population for Kings, NY is unusually high, while Bronx, New York and Queens counties are zero. The correct information can be found in this document, <https://www2.census.gov/programs-surveys/popest/tables/1990-2000/intercensal/st-co/co-est2001-12-36.pdf>. We will replace the incorrect data in the original list and rerun our county plot function.
+
+```{r}
+combined_census_lists_PST[[1]] |> 
+  filter(area_name == "Kings, NY" | area_name == "Queens, NY" | 
+           area_name == "Bronx, NY" | 
+           area_name == "New York, NY", year == 1992)
+```
+
+```{r}
+combined_census_lists_PST_modified <- combined_census_lists_PST
+combined_census_lists_PST_modified$county_data <- 
+  combined_census_lists_PST_modified$county_data |> 
+  mutate(population = 
+           ifelse(area_name == "Bronx, NY" & year == 1992 & 
+                    population == 0, 1223153, 
+                  ifelse(area_name == "Queens, NY" & year == 1992 & 
+                           population == 0, 1996512, 
+                         ifelse(area_name == "Kings, NY" & year == 1992 & 
+                                  population == 7428944, 2327759,
+                                ifelse(area_name == "New York, NY" 
+                                       & year == 1992 & population == 0, 
+                                       1485877, population)))))
+combined_census_lists_PST_modified[[1]] |> 
+  filter(area_name == "Kings, NY" | area_name == "Queens, NY" | 
+           area_name == "Bronx, NY" | area_name == "New York, NY", year == 1992)
+         
+```
+
+#### County Plot for NY, top 10 with Outliers Replaced
+
+```{r}
+plot.county(combined_census_lists_PST_modified, var_name = "population", select_state = "NY", x=10)
 ```
