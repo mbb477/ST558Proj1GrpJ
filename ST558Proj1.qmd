@@ -41,18 +41,18 @@ census_1a_condensed <- census_1a_original |>
                names_to = "item_id", 
                values_to = "enrollment") |> 
   filter(area_name != "District of Columbia")
-head(census_1a_condensed) 
+census_1a_condensed
 ```
 
 ### Step 3: Add Year and Survey Code Columns
 
-Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in its own column. We also want to isolate and put in it's own column the portion of the item_id that corresponds to the survey code and value associated with it. We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit number to obtain the 4 digit year. The survey code is extracted in a similar manner.
+Next, we want to pull out the year from the item_id and convert it to an appropriate, 4-digit form placed in its own column. We also want to isolate and put in its own column the portion of the item_id that corresponds to the survey code and value associated with it (first 7 digits). We can use the mutate function to add these columns. The substr() function allows you to extract a string based on position. For the year, for example, the numbers corresponding to the year are in the 8th and 9th position of the 10 character string. Then we add 1900 to the extracted 2 digit year to obtain the 4 digit year. The survey code is extracted in a similar manner.
 
 ```{r}
 census_1a_add <- census_1a_condensed |>
   mutate(year = (as.numeric(substr(item_id, 8, 9)) + 1900),
          survey_code = substr(item_id, 1, 7))
-head(census_1a_add)
+census_1a_add
 ```
 
 ### Step 4: Create County and State Data Sets from Census Data Set
@@ -69,8 +69,8 @@ noncounty_data <- census_1a_add |>
 class(county_data) <- c("county", class(county_data))
 class(noncounty_data) <- c("state", class(noncounty_data))
 
-head(county_data)
-head(noncounty_data)
+county_data
+noncounty_data
 ```
 
 ### Step 5: Add New Variable for County Data
@@ -81,7 +81,7 @@ Within the county data set, we now return to using substr() to extract the last 
 county_data <- county_data |>
   mutate(state = substr(area_name, nchar(area_name)-1,
                         nchar(area_name)))
-head(county_data)
+county_data
 ```
 
 ### Step 6: Add New Variable for Non-County Data
@@ -121,7 +121,7 @@ noncounty_data <- noncounty_data |>
                     "ALASKA", "CALIFORNIA", "HAWAII", "OREGON",
                     "WASHINGTON"), "Pacific", 
                   "ERROR"))))))))))
-head(noncounty_data)
+noncounty_data
 ```
 
 ## Data processing function creation
@@ -133,12 +133,13 @@ We now turn to a second data set EDU01b, which contains data structured similarl
 To begin, we import the new data set we will be working with. Although this step will ultimately be incorporated into our final wrapper function, importing at this point allows us to build and test each component of our functions.
 
 ```{r}
-census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+census_1b_original <- 
+  read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
 ### Function to Select Columns and Pivot to Long Form
 
-Creating the first part of the function is fairly simple and includes the steps of selecting our columns, renaming and pivoting. Our arguments for the function are our tibble we imported and a default variable name which can be changed as appropriate for the data set. Testing the function produces a similar result as obtained with the first data set.
+Creating the first part of the function is fairly simple and includes the steps of selecting our columns, renaming, pivoting and removing the duplicate District of Columbia data. Our arguments for the function are our imported tibble and a default variable name which can be changed as appropriate for the data set. Here, we use the default variable name of "enrollment" since the EDU data sets report public school enrollment. Testing the function produces a similar result as obtained with the first data set.
 
 ```{r}
 select_pivot <- function(census_df, default_var_name = "enrollment") {
@@ -221,7 +222,7 @@ add_division <- function(census_df) {
 }
 ```
 
-### Function to Split the Data Set into County and Non-County Data
+### Function to Split the Data Set into County and Non-County Tibbles
 
 Here, we create a higher-order function that will split the data into two data sets (one for county-level data, and one for non-county data), add the county or state class to each data set, and then call the above two functions to add the new variables.
 
@@ -286,11 +287,11 @@ combined_census_lists_EDU <- combine_census_lists(census_df_list_EDU01a, census_
 
 # Generic Summarizing Functions
 
-The goal of this section is to create two functions that will take in combined data sets (as a list) from our data combining function and create plots for county and non-county (state) data. Details of these functions are provided in subsequent sections.
+The goal of this section is to create two functions that will take in combined data sets (as a list) from our data combining function and create plots for county and non-county (state) data. Details of these functions are provided in the subsequent sections.
 
 ## State Plotting Function
 
-For the state plotting function, we want to create a function that will take in our combined census data sets and our default variable as arguments and returns a plot of year versus the mean of the default variable for each division. To accomplish this, we first need to do some manipulation with our tibble. First, we isolate the proper tibble from the list using \$noncounty_data. Since the United States is not a division and has "ERROR" in the division column, we need to filter to remove those rows. Finally we can group by year and division so that the appropriate means are calculated. To calculate a mean for each year and division combination, we use summarize and reference our default variable name for the mean function.
+For the state plotting function, we want to create a function that will take in our combined census data sets and our default variable as arguments and returns a plot of year versus the mean of the default variable for each division. To accomplish this, we first need to do some manipulation of our tibble. First, we isolate the proper tibble from the list using \$noncounty_data. Since the United States is not a division and has "ERROR" in the division column, we need to filter to remove these rows. Finally we can group by year and division so that the appropriate means are calculated. To calculate a mean for each year and division combination, we use summarize and reference our default variable name in the mean call.
 
 After putting our data in the proper form and obtaining means, we can create our line plot. We use ggplot to create a plot instance. The plot instance needs two arguments, one specifying our data and the other an aesthetic (aes) mapping argument. The aes mapping defines the x and y axis variables, as well as mapping for division so the plot assigns a different color and line to each division. Next we add layers. Since we want a line connecting years for each division, we use geom_line. We chose to leave the defaults in place so no arguments are specified. A labs layer was then added to modify some labels. The axes and legend labels are capitalized and the title and y-axis label specified in a way that will allow the names to change dynamically according to the default variable name used when calling the function.
 
@@ -312,11 +313,11 @@ state.plot <- function(df, var_name = "enrollment") {
 
 ## County Plotting Function
 
-For county plotting, we will create a function that takes in the combined county data frame and several other arguments, including a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. Default sorting is "top" and default number of counties is 5. Note that if something other than "top" or "bottom" is specified for sort, the code will abort and an error message will be returned.
+For county plotting, we will create a function that takes in the combined county data frame and several other arguments, including a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. Default sorting is "top" and the default number of counties is 5. Note that if something other than "top" or "bottom" is specified for sort, the code will abort and an error message will be returned.
 
 In order to accomplish this, the first portion of the code will filter the county data by the selected state and then compute mean values of the specified variable for each county in that state. The list of counties and their corresponding means are stored temporarily as "result". From there, a series of if/else statements sorts the resulting list of counties according to which direction has been specified (top or bottom), and then the first x number of rows are retained in "county_names" for the next step.
 
-Because we are not using continuous piping, and because our initial code reduced the data down to a single mean value per county in order to sort and identify top or bottom counties, we return to the original combined data as specified in our function arguments for the next step. We now apply the filter function and reference the list of county names generated in the previous step to retain each annual observation for each of the identified counties. Finally, we use ggplot to create a line graph for each county, with year on the x-axis and the value of our specified variable on the y axis. We also specify color coding for the different lines representing different counties, create labels for our axes, and add a title.
+Because we are not using continuous piping, and because our initial code reduced the data down to a single mean value per county in order to sort and identify top or bottom counties, we use the original combined data as specified in our function arguments for the next step. We now apply the filter function and reference the list of county names generated in the previous step to retain each annual observation for each of the identified counties. Finally, we use ggplot to create a line graph for each county, with year on the x-axis and the value of our specified variable on the y-axis. We also specify color coding for the different lines representing different counties, create labels for our axes, and add a title.
 
 ```{r}
 plot.county <- function(census_df, var_name = "enrollment", 
@@ -382,24 +383,25 @@ census_df_list_EDU01b
 ```{r}
 combined_census_lists_EDU <- 
   combine_census_lists(census_df_list_EDU01a, census_df_list_EDU01b)
+combined_census_lists_EDU
 ```
 
 ### State Plot Function Applied to EDU Data Sets
 
-#### EDU State Plot With Possible Outlier
+#### EDU State Plot with Possible Outlier
 
 ```{r}
 state.plot(combined_census_lists_EDU)
 ```
 
-Looking at the plot above, we see a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see that the enrollment for New Jersey is recorded as zero.
+Looking at the plot above, we see a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see below that the enrollment for New Jersey is recorded as zero.
 
 ```{r}
 outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |> filter(year == 1997, division == "Middle Atlantic") 
 outlier_mid_atlantic
 ```
 
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced in the original combined list using ifelse() in a mutate statement.
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced in the original combined list using ifelse() in a mutate statement. To preserve the original data, we will assign a new name to this list. The modification was confirmed by running the filter step on the new data set.
 
 ```{r}
 combined_census_lists_EDU_modified <- combined_census_lists_EDU
@@ -413,7 +415,7 @@ combined_census_lists_EDU_modified[[2]] |>
   filter(year == 1997, division == "Middle Atlantic")
 ```
 
-#### EDU State Plot With Outlier Replaced
+#### EDU State Plot with Outlier Replaced
 
 ```{r}
 state.plot(combined_census_lists_EDU_modified)
@@ -423,31 +425,31 @@ state.plot(combined_census_lists_EDU_modified)
 
 Below, we plot county educational enrollment data for several different states using different input arguments.
 
-#### County Plot for NC, top 20
+#### County Plot for NC, Top 20
 
 ```{r}
 plot.county(combined_census_lists_EDU, x=20)
 ```
 
-#### County Plot for SC, bottom 7
+#### County Plot for SC, Bottom 7
 
 ```{r}
 plot.county(combined_census_lists_EDU, select_state = "SC", sort = "bottom", x=7)
 ```
 
-#### County plot with no specifications (default only)
+#### County plot with No Specifications (default only)
 
 ```{r}
 plot.county(combined_census_lists_EDU)
 ```
 
-#### County plot for PA, top 8
+#### County Plot for PA, Top 8
 
 ```{r}
 plot.county(combined_census_lists_EDU, select_state = "PA", sort="top", x=8)
 ```
 
-## PST Data sets
+## PST Data Sets
 
 Now we apply our functions to new data, this time looking at state and county population instead of educational enrollment. We will import and process 4 different population (PST) data sets using our data_processing_wrapper, and combine them using our combine_census_lists function as before. Because our function is designed to combine 2 data sets, we will apply it in several steps, first joining 2 data sets together, then combining the result with a 3rd, and finally combining that with a 4th for a complete data set. Finally, we will use our state.plot and plot.county functions as before to visualize the data.
 
@@ -496,7 +498,7 @@ combined_census_lists_PST_1a_1b
 
 ```
 
-#### Combining PST01c to PST1a/1b
+#### Combining PST01c with PST1a/1b
 
 ```{r}
 combined_census_lists_PST_1a_1b_1c <- 
@@ -504,7 +506,7 @@ combined_census_lists_PST_1a_1b_1c <-
 combined_census_lists_PST_1a_1b_1c
 ```
 
-#### Full Combined PST list
+#### Full Combined PST List
 
 ```{r}
 combined_census_lists_PST <- 
@@ -522,31 +524,31 @@ state.plot(combined_census_lists_PST, "population")
 
 Below, we plot county population data for several different states using different input arguments. In this case, we will specify var_name = "population" throughout, given that the default var_name of "enrollment" does not exist in these data.
 
-#### County Plot for CA, top 15
+#### County Plot for CA, Top 15
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "CA", x=15)
 ```
 
-#### County Plot for TX, top 4
+#### County Plot for TX, Top 4
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "TX", x=4)
 ```
 
-#### County Plot with no specifications (default only)
+#### County Plot with No Specifications (Default Only)
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population")
 ```
 
-#### County Plot for NY, top 10
+#### County Plot for NY, Top 10
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "NY", x=10)
 ```
 
-It looks like there may be some outliers in this data. We will investigate by filtering data for the counties of Kings, Queens and Bronx in 1992.
+It looks like there may be some outliers in this data. We will investigate by filtering data for the counties of Bronx, Kings, New York and Queens in 1992, although we can see visually that 3 of the counties are zero.
 
 ```{r}
 combined_census_lists_PST[[1]] |> 
@@ -555,7 +557,7 @@ combined_census_lists_PST[[1]] |>
            area_name == "New York, NY", year == 1992)
 ```
 
-We can see that the population for Kings, NY is unusually high, while Bronx, New York and Queens counties are zero. The correct information can be found in this document, <https://www2.census.gov/programs-surveys/popest/tables/1990-2000/intercensal/st-co/co-est2001-12-36.pdf>. We will replace the incorrect data in the original list and rerun our county plot function.
+We can see that the population for Kings, NY is unusually high, while Bronx, New York and Queens counties are zero. The correct populations can be found in this document, <https://www2.census.gov/programs-surveys/popest/tables/1990-2000/intercensal/st-co/co-est2001-12-36.pdf>. We will replace the incorrect data in the original list, verify our changes and rerun the county plot function.
 
 ```{r}
 combined_census_lists_PST_modified <- combined_census_lists_PST
@@ -577,7 +579,7 @@ combined_census_lists_PST_modified[[1]] |>
          
 ```
 
-#### County Plot for NY, top 10 with Outliers Replaced
+#### County Plot for NY, Top 10 with Outliers Replaced
 
 ```{r}
 plot.county(combined_census_lists_PST_modified, var_name = "population", select_state = "NY", x=10)
