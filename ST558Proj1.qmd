@@ -6,7 +6,7 @@ format: html
 editor: visual
 ---
 
-# Data processing
+# Data Processing
 
 One of the goals of this project is to create a function that can take in a URL and process and parse similar types of data sets in a specific way. The data sets we are working with are files that contain Census Bureau information.
 
@@ -25,7 +25,7 @@ library(tidyverse)
 library(readr)
 census_1a_original <- 
 read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
-head(census_1a_original)
+#head(census_1a_original)
 ```
 
 ### Steps 1 and 2: Select Columns and Pivot to Long Form, Remove Duplicate District of Columbia
@@ -134,7 +134,7 @@ To begin, we import the new data set we will be working with. Although this step
 
 ```{r}
 census_1b_original <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-head(census_1b_original)
+#head(census_1b_original)
 ```
 
 ### Function to Select Columns and Pivot to Long Form
@@ -283,8 +283,8 @@ census_df_list_EDU01a <-
 census_df_list_EDU01b <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 
-census_df_list_EDU01a
-census_df_list_EDU01b
+#census_df_list_EDU01a
+#census_df_list_EDU01b
 ```
 
 ## Data Combining Function
@@ -300,7 +300,7 @@ combine_census_lists <- function(list1, list2) {
 }
 
 combined_census_lists_EDU <- combine_census_lists(census_df_list_EDU01a, census_df_list_EDU01b)
-combined_census_lists_EDU
+#combined_census_lists_EDU
 
 ```
 
@@ -373,7 +373,15 @@ state.plot <- function(df, var_name = "enrollment") {
 
 ## County Plotting Function
 
-For county plotting, we will create a function that takes in the data frame, a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. First, we test the ability for our function to identify these counties and output their names.
+For county plotting, we will create a function that takes in the combined county data frame and several other arguments, including a selected state (default = North Carolina) and a specified variable name (default = "enrollment"). The function will then sort the counties within the state according to the value of the specified variable. Additional arguments indicate whether the user wants to sort from largest to smallest (sort = "top") or smallest to largest (sort = "bottom"), and how many counties from the list should be included in the top or bottom grouping. Default sorting is "top" and default number of counties is 5. Note that if something other than "top" or "bottom" is specified for sort, the code will abort and an error message will be returned.
+
+In order to accomplish this, the first portion of the code will filter the county data by the selected state and then compute mean values of the specified variable for each county in that state. The list of counties and their corresponding means are stored temporarily as "result".
+
+From there, a series of if/else statements sorts the resulting list of counties according to which direction has been specified (top or bottom), and then the first x number of rows are retained in "county_names" for the next step.
+
+Because we are not using continuous piping, and because our initial code reduced the data down to a single mean value per county in order to sort and identify top or bottom counties, we return to the original combined data as specified in our function arguments for the next step. We now apply the filter function and reference the list of county names generated in the previous step to retain each annual observation for each of the identified counties.
+
+Finally, we use ggplot to create a line graph for each county, with year on the x-axis and the value of our specified variable on the y axis. We also specify color coding for the different lines representing different counties, create labels for our axes, and add a title.
 
 ```{r}
 plot.county <- function(census_df, var_name = "enrollment", 
@@ -387,46 +395,53 @@ if(sort %in% c("top")){
     county_names <- result |>
       arrange(desc(mean_values)) |>
       slice_head(n=x)
-  } else {
+  } else if(sort %in% c("bottom")){
       county_names <- result |>
         arrange(mean_values) |>
         slice_head(n=x)
-  }
+  } else {
+    print(paste(sort, "is not a valid selection. Sort must be top or bottom."))
+    break
+}
 output <- census_df$county_data |>
-  filter(state == select_state, 
-         area_name %in% county_names$area_name)
+  filter(area_name %in% county_names$area_name)
 
 ggplot(output, aes(x = year, y = get(var_name), color = area_name)) +
     geom_line() +
     labs (x = "Year", y = str_to_title(var_name), 
           color = "County", 
-          title = str_to_title(paste(var_name, "per year for", sort, x, "counties")))
+          title = str_to_title(paste(var_name, "per year for", sort, x, "counties in",
+                                     select_state)))
 }
 
-plot.county(combined_census_lists_EDU, sort = "bottom", x=5)
+#plot.county(combined_census_lists_EDU, sort = "bottom", x=5)
 
 ```
 
-# Putting it Together (need a better name, maybe)
+# Executing Our Functions and Plotting the Data
+
+In this section, we will now tie everything together that we have created up to this point. We will execute our functions to import data, implement the processing steps, combine two data sets into one, and then create state and county plots. We will also now be able to apply this to multiple new data sets. 
 
 ## EDU Data Sets
 
+We begin with the two EDU data sets we have been working with until now. These are each called in and processed by our data_processing_wrapper function, combined using our combined_census_lists function, and then visualized using our state.plot and plot.county functions. 
+
 ### Data Processing Function Applied to EDU Data Sets
 
-#### EDU1a
+#### EDU01a
 
 ```{r}
 census_df_list_EDU01a <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
-census_df_list_EDU01a
+#census_df_list_EDU01a
 ```
 
-#### EDU1b
+#### EDU01b
 
 ```{r}
 census_df_list_EDU01b <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-census_df_list_EDU01b
+#census_df_list_EDU01b
 ```
 
 ### Data Combining Function Applied to EDU Data Sets
@@ -434,7 +449,7 @@ census_df_list_EDU01b
 ```{r}
 combined_census_lists_EDU <- 
   combine_census_lists(census_df_list_EDU01a, census_df_list_EDU01b)
-combined_census_lists_EDU
+#combined_census_lists_EDU
 ```
 
 ### State Plot Function Applied to EDU Data Sets
@@ -453,11 +468,32 @@ state.plot(combined_census_lists_EDU_modified)
 
 ### County Plot Function Applied to EDU Data Sets
 
-```{r}
+Below, we plot county educational enrollment data for several different states using different input arguments.
 
+#### County Plot for NC, top 20
+
+```{r}
+plot.county(combined_census_lists_EDU, x=20)
+```
+#### County Plot for SC, bottom 7
+
+```{r}
+plot.county(combined_census_lists_EDU, select_state = "SC", sort = "bottom", x=7)
+```
+#### County plot with no specifications (default only)
+
+```{r}
+plot.county(combined_census_lists_EDU)
+```
+#### County plot for PA, top 8
+
+```{r}
+plot.county(combined_census_lists_EDU, select_state = "PA", sort="top", x=8)
 ```
 
 ## PST Data sets
+
+Now we apply our functions to new data, this time looking at state and county population instead of educational enrollment. We will import and process 4 different population (PST) data sets using our data_processing_wrapper, and combine them using our combine_census_lists function as before. Because our function is designed to combine 2 data sets, we will apply it in several steps, first joining 2 data sets together, then combining the result with a 3rd, and finally combining that with a 4th for a complete data set. Finally, we will use our state.plot and plot.county functions as before to visualize the data. 
 
 ### Data Processing Function Applied to PST Data Sets
 
@@ -466,7 +502,7 @@ state.plot(combined_census_lists_EDU_modified)
 ```{r}
 census_df_list_PST01a <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", "population")
-census_df_list_PST01a
+#census_df_list_PST01a
 ```
 
 #### PST01b
@@ -474,7 +510,7 @@ census_df_list_PST01a
 ```{r}
 census_df_list_PST01b <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", "population")
-census_df_list_PST01b
+#census_df_list_PST01b
 ```
 
 #### PST01c
@@ -482,7 +518,7 @@ census_df_list_PST01b
 ```{r}
 census_df_list_PST01c <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", "population")
-census_df_list_PST01c
+#census_df_list_PST01c
 ```
 
 #### PST01d
@@ -490,7 +526,7 @@ census_df_list_PST01c
 ```{r}
 census_df_list_PST01d <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", "population")
-census_df_list_PST01d
+#census_df_list_PST01d
 ```
 
 ### Data Combining Function Applied to PST Data Sets
@@ -500,7 +536,7 @@ census_df_list_PST01d
 ```{r}
 combined_census_lists_PST_1a_1b <- combine_census_lists(census_df_list_PST01a, 
                                                         census_df_list_PST01b)
-combined_census_lists_PST_1a_1b
+#combined_census_lists_PST_1a_1b
 
 ```
 
@@ -509,7 +545,7 @@ combined_census_lists_PST_1a_1b
 ```{r}
 combined_census_lists_PST_1a_1b_1c <- 
   combine_census_lists(combined_census_lists_PST_1a_1b, census_df_list_PST01c)
-combined_census_lists_PST_1a_1b_1c
+#combined_census_lists_PST_1a_1b_1c
 ```
 
 #### Full Combined PST list
@@ -517,7 +553,7 @@ combined_census_lists_PST_1a_1b_1c
 ```{r}
 combined_census_lists_PST <- 
   combine_census_lists(combined_census_lists_PST_1a_1b_1c, census_df_list_PST01d)
-combined_census_lists_PST
+#combined_census_lists_PST
 ```
 
 ### State Plot Function Applied to PST Data Sets
@@ -539,3 +575,26 @@ state.plot(combined_census_lists_PST)
 ```
 
 ### County Plot Function Applied to PST Data Sets
+
+Below, we plot county population data for several different states using different input arguments. In this case, we will specify var_name = "population" throughout, given that the default var_name of "enrollment" does not exist in these data.
+
+#### County Plot for CA, top 15
+
+```{r}
+plot.county(combined_census_lists_PST, var_name = "population", select_state = "CA", x=15)
+```
+#### County Plot for TX, top 4
+
+```{r}
+plot.county(combined_census_lists_PST, var_name = "population", select_state = "TX", x=4)
+```
+#### County Plot with no specifications (default only)
+
+```{r}
+plot.county(combined_census_lists_PST, var_name = "population")
+```
+#### County Plot for NY, top 10
+
+```{r}
+plot.county(combined_census_lists_PST, var_name = "population", select_state = "NY", x=10)
+```
