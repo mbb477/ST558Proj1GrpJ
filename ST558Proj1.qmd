@@ -28,7 +28,7 @@ read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 #head(census_1a_original)
 ```
 
-### Steps 1 and 2: Select Columns and Pivot to Long Form, Remove Duplicate District of Columbia
+### Steps 1 and 2: Select Columns and Pivot to Long Form, Remove Duplicate District of Columbia Data
 
 The next step is to select the columns we are interested in, followed by pivoting the data into a long format, which is more appropriate for data analysis. In this case, we are selecting Area_name, which is also being renamed to area_name, STCOU, which is a state (first 2 digits) and county (last 3 digits) code and all columns that end with a "D". These columns ending in "D" correspond to an id that identifies the type of survey and value associated with it and the 2 digit year. We also used filter() to remove duplicate District of Columbia data.
 
@@ -342,33 +342,28 @@ outlier_mid_atlantic
   
 ```
 
-EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun the plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced in the original combined data set using ifelse() in a mutate statement.
+EDU01097 corresponds to public education enrollment for fall 1996-1997. An online search found a document from the New Jersey Department of Education indicating that enrollment for the 1996-1997 school year was 1,227,832, so we will replace the zero with this number and rerun a modified plot function (<https://nces.ed.gov/pubs2000/stateprofiles/pdf/new_jersey.pdf>). The incorrect data point can be replaced using ifelse() in a mutate statement.
 
 ```{r}
-combined_census_lists_EDU_modified <- combined_census_lists_EDU
-combined_census_lists_EDU_modified$noncounty_data <-
-  combined_census_lists_EDU_modified$noncounty_data |>
-  mutate(enrollment = 
-           ifelse(area_name == "NEW JERSEY" & year == 1997 & 
-                    enrollment == 0, 1227832, enrollment))
-#verify change
-combined_census_lists_EDU_modified[[2]] |>
-  filter(year == 1997, division == "Middle Atlantic")
-  
 state.plot <- function(df, var_name = "enrollment") {
   result <- df$noncounty_data |>
     filter(area_name != "UNITED STATES") |> 
-        group_by(division, year) |> 
+    mutate({{ var_name }} := ifelse(area_name == "NEW JERSEY" & year == 1997 &  
+                                      get(var_name) == 0, 1227832, 
+                                    get(var_name))) |>
+    group_by(division, year) |> 
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
+  
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
-    labs (x = "Year", y = str_to_title(paste("mean", var_name)), 
-          color = "Division", 
-          title = str_to_title(paste("mean", var_name, "per year by division")))
+    labs(x = "Year", y = str_to_title(paste("Mean", var_name)), 
+         color = "Division", 
+         title = str_to_title(paste("Mean", var_name, "per year by division")))
+  
   return(g)
 }
 
-#state.plot(combined_census_lists_EDU_modified)
+#state.plot(combined_census_lists_EDU)
 ```
 
 ## County Plotting Function
@@ -420,11 +415,11 @@ ggplot(output, aes(x = year, y = get(var_name), color = area_name)) +
 
 # Executing Our Functions and Plotting the Data
 
-In this section, we will now tie everything together that we have created up to this point. We will execute our functions to import data, implement the processing steps, combine two data sets into one, and then create state and county plots. We will also now be able to apply this to multiple new data sets. 
+In this section, we will now tie everything together that we have created up to this point. We will execute our functions to import data, implement the processing steps, combine two data sets into one, and then create state and county plots. We will also now be able to apply this to multiple new data sets.
 
 ## EDU Data Sets
 
-We begin with the two EDU data sets we have been working with until now. These are each called in and processed by our data_processing_wrapper function, combined using our combined_census_lists function, and then visualized using our state.plot and plot.county functions. 
+We begin with the two EDU data sets we have been working with until now. These are each called in and processed by our data_processing_wrapper function, combined using our combined_census_lists function, and then visualized using our state.plot and plot.county functions.
 
 ### Data Processing Function Applied to EDU Data Sets
 
@@ -433,7 +428,7 @@ We begin with the two EDU data sets we have been working with until now. These a
 ```{r}
 census_df_list_EDU01a <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
-#census_df_list_EDU01a
+census_df_list_EDU01a
 ```
 
 #### EDU01b
@@ -441,7 +436,7 @@ census_df_list_EDU01a <-
 ```{r}
 census_df_list_EDU01b <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-#census_df_list_EDU01b
+census_df_list_EDU01b
 ```
 
 ### Data Combining Function Applied to EDU Data Sets
@@ -457,13 +452,27 @@ combined_census_lists_EDU <-
 #### EDU State Plot With Outlier
 
 ```{r}
-state.plot(combined_census_lists_EDU)
+state.plot.outlier <- function(df, var_name = "enrollment") {
+  result <- df$noncounty_data |>
+    filter(area_name != "UNITED STATES") |> 
+    group_by(division, year) |> 
+    summarize(mean_values = mean(get(var_name)), .groups = "drop")
+  
+  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
+    geom_line() +
+    labs(x = "Year", y = str_to_title(paste("Mean", var_name)), 
+         color = "Division", 
+         title = str_to_title(paste("Mean", var_name, "per year by division")))
+  
+  return(g)
+}
+state.plot.outlier(combined_census_lists_EDU)
 ```
 
 #### EDU State Plot With Outlier Replaced
 
 ```{r}
-state.plot(combined_census_lists_EDU_modified)
+state.plot(combined_census_lists_EDU)
 ```
 
 ### County Plot Function Applied to EDU Data Sets
@@ -475,16 +484,19 @@ Below, we plot county educational enrollment data for several different states u
 ```{r}
 plot.county(combined_census_lists_EDU, x=20)
 ```
+
 #### County Plot for SC, bottom 7
 
 ```{r}
 plot.county(combined_census_lists_EDU, select_state = "SC", sort = "bottom", x=7)
 ```
+
 #### County plot with no specifications (default only)
 
 ```{r}
 plot.county(combined_census_lists_EDU)
 ```
+
 #### County plot for PA, top 8
 
 ```{r}
@@ -493,7 +505,7 @@ plot.county(combined_census_lists_EDU, select_state = "PA", sort="top", x=8)
 
 ## PST Data sets
 
-Now we apply our functions to new data, this time looking at state and county population instead of educational enrollment. We will import and process 4 different population (PST) data sets using our data_processing_wrapper, and combine them using our combine_census_lists function as before. Because our function is designed to combine 2 data sets, we will apply it in several steps, first joining 2 data sets together, then combining the result with a 3rd, and finally combining that with a 4th for a complete data set. Finally, we will use our state.plot and plot.county functions as before to visualize the data. 
+Now we apply our functions to new data, this time looking at state and county population instead of educational enrollment. We will import and process 4 different population (PST) data sets using our data_processing_wrapper, and combine them using our combine_census_lists function as before. Because our function is designed to combine 2 data sets, we will apply it in several steps, first joining 2 data sets together, then combining the result with a 3rd, and finally combining that with a 4th for a complete data set. Finally, we will use our state.plot and plot.county functions as before to visualize the data.
 
 ### Data Processing Function Applied to PST Data Sets
 
@@ -502,7 +514,7 @@ Now we apply our functions to new data, this time looking at state and county po
 ```{r}
 census_df_list_PST01a <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", "population")
-#census_df_list_PST01a
+census_df_list_PST01a
 ```
 
 #### PST01b
@@ -510,7 +522,7 @@ census_df_list_PST01a <-
 ```{r}
 census_df_list_PST01b <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", "population")
-#census_df_list_PST01b
+census_df_list_PST01b
 ```
 
 #### PST01c
@@ -518,7 +530,7 @@ census_df_list_PST01b <-
 ```{r}
 census_df_list_PST01c <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", "population")
-#census_df_list_PST01c
+census_df_list_PST01c
 ```
 
 #### PST01d
@@ -526,7 +538,7 @@ census_df_list_PST01c <-
 ```{r}
 census_df_list_PST01d <- 
   data_processing_wrapper("https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", "population")
-#census_df_list_PST01d
+census_df_list_PST01d
 ```
 
 ### Data Combining Function Applied to PST Data Sets
@@ -536,7 +548,7 @@ census_df_list_PST01d <-
 ```{r}
 combined_census_lists_PST_1a_1b <- combine_census_lists(census_df_list_PST01a, 
                                                         census_df_list_PST01b)
-#combined_census_lists_PST_1a_1b
+combined_census_lists_PST_1a_1b
 
 ```
 
@@ -545,7 +557,7 @@ combined_census_lists_PST_1a_1b <- combine_census_lists(census_df_list_PST01a,
 ```{r}
 combined_census_lists_PST_1a_1b_1c <- 
   combine_census_lists(combined_census_lists_PST_1a_1b, census_df_list_PST01c)
-#combined_census_lists_PST_1a_1b_1c
+combined_census_lists_PST_1a_1b_1c
 ```
 
 #### Full Combined PST list
@@ -553,25 +565,13 @@ combined_census_lists_PST_1a_1b_1c <-
 ```{r}
 combined_census_lists_PST <- 
   combine_census_lists(combined_census_lists_PST_1a_1b_1c, census_df_list_PST01d)
-#combined_census_lists_PST
+combined_census_lists_PST
 ```
 
 ### State Plot Function Applied to PST Data Sets
 
 ```{r}
-state.plot <- function(df, var_name = "population") {
-  result <- df$noncounty_data |>
-    filter(area_name != "UNITED STATES") |> 
-    group_by(division, year) |> 
-    summarize(mean_values = mean(get(var_name)), .groups = "drop")
-  g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
-    geom_line() +
-    labs (x = "Year", y = str_to_title(paste("mean", var_name)), 
-          color = "Division", 
-          title = str_to_title(paste("mean", var_name, "per year by division")))
-  return(g)
-}
-state.plot(combined_census_lists_PST)
+state.plot(combined_census_lists_PST, "population")
 ```
 
 ### County Plot Function Applied to PST Data Sets
@@ -583,16 +583,19 @@ Below, we plot county population data for several different states using differe
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "CA", x=15)
 ```
+
 #### County Plot for TX, top 4
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population", select_state = "TX", x=4)
 ```
+
 #### County Plot with no specifications (default only)
 
 ```{r}
 plot.county(combined_census_lists_PST, var_name = "population")
 ```
+
 #### County Plot for NY, top 10
 
 ```{r}
