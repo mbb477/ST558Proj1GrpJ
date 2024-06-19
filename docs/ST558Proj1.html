@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="M. Sweitzer, M. Beebe">
-<meta name="dcterms.date" content="2024-06-18">
+<meta name="dcterms.date" content="2024-06-19">
 
 <title>ST558 Project 1</title>
 <style>
@@ -135,7 +135,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 18, 2024</p>
+      <p class="date">June 19, 2024</p>
     </div>
   </div>
   
@@ -555,10 +555,11 @@ dbl (20): EDU010197F, EDU010197D, EDU010198F, EDU010198D, EDU010199F, EDU010...
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_values =</span> <span class="fu">mean</span>(<span class="fu">get</span>(var_name)), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> mean_values, <span class="at">color =</span> division)) <span class="sc">+</span></span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), <span class="at">color =</span> <span class="st">"Division"</span>, </span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">toTitleCase</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span> (<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="fu">str_to_title</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name)), </span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"Division"</span>, </span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">title =</span> <span class="fu">toTitleCase</span>(<span class="fu">paste</span>(<span class="st">"mean"</span>, var_name, <span class="st">"per year by division"</span>)))</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(g)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="county-plotting-function" class="level2">
@@ -767,8 +768,9 @@ $noncounty_data
 </div>
 <p>Looking at the plot above, we see a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see below that the enrollment for New Jersey is recorded as zero.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic <span class="ot">&lt;-</span> combined_census_lists_EDU[[<span class="dv">2</span>]] <span class="sc">|&gt;</span> <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1997</span>, division <span class="sc">==</span> <span class="st">"Middle Atlantic"</span>) </span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic <span class="ot">&lt;-</span> combined_census_lists_EDU[[<span class="dv">2</span>]] <span class="sc">|&gt;</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1997</span>, division <span class="sc">==</span> <span class="st">"Middle Atlantic"</span>) </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>outlier_mid_atlantic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 7
   area_name    STCOU item_id    enrollment  year survey_code division       
@@ -819,7 +821,7 @@ $noncounty_data
 <section id="county-plot-for-nc-top-20" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-nc-top-20">County Plot for NC, Top 20</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">x=</span><span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">x =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -832,7 +834,7 @@ $noncounty_data
 <section id="county-plot-for-sc-bottom-7" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-sc-bottom-7">County Plot for SC, Bottom 7</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">select_state =</span> <span class="st">"SC"</span>, <span class="at">sort =</span> <span class="st">"bottom"</span>, <span class="at">x=</span><span class="dv">7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">select_state =</span> <span class="st">"SC"</span>, <span class="at">sort =</span> <span class="st">"bottom"</span>, <span class="at">x =</span> <span class="dv">7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -858,7 +860,7 @@ $noncounty_data
 <section id="county-plot-for-pa-top-8" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-pa-top-8">County Plot for PA, Top 8</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">select_state =</span> <span class="st">"PA"</span>, <span class="at">sort=</span><span class="st">"top"</span>, <span class="at">x=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_EDU, <span class="at">select_state =</span> <span class="st">"PA"</span>, <span class="at">sort=</span><span class="st">"top"</span>, <span class="at">x =</span> <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1225,7 +1227,8 @@ $noncounty_data
 <section id="county-plot-for-ca-top-15" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-ca-top-15">County Plot for CA, Top 15</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, <span class="at">select_state =</span> <span class="st">"CA"</span>, <span class="at">x=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, </span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">select_state =</span> <span class="st">"CA"</span>, <span class="at">x =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1238,7 +1241,8 @@ $noncounty_data
 <section id="county-plot-for-tx-top-4" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-tx-top-4">County Plot for TX, Top 4</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, <span class="at">select_state =</span> <span class="st">"TX"</span>, <span class="at">x=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, </span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">select_state =</span> <span class="st">"TX"</span>, <span class="at">x =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1264,7 +1268,8 @@ $noncounty_data
 <section id="county-plot-for-ny-top-10" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-ny-top-10">County Plot for NY, Top 10</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, <span class="at">select_state =</span> <span class="st">"NY"</span>, <span class="at">x=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST, <span class="at">var_name =</span> <span class="st">"population"</span>, </span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">select_state =</span> <span class="st">"NY"</span>, <span class="at">x =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1276,9 +1281,11 @@ $noncounty_data
 <p>It looks like there may be some outliers in this data. We will investigate by filtering data for the counties of Bronx, Kings, New York and Queens in 1992, although we can see visually that 3 of the counties are zero.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>combined_census_lists_PST[[<span class="dv">1</span>]] <span class="sc">|&gt;</span> </span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(area_name <span class="sc">==</span> <span class="st">"Kings, NY"</span> <span class="sc">|</span> area_name <span class="sc">==</span> <span class="st">"Queens, NY"</span> <span class="sc">|</span> </span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Bronx, NY"</span> <span class="sc">|</span> </span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"New York, NY"</span>, year <span class="sc">==</span> <span class="dv">1992</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(area_name <span class="sc">==</span> <span class="st">"Kings, NY"</span> <span class="sc">|</span> </span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Queens, NY"</span> <span class="sc">|</span> </span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Bronx, NY"</span> <span class="sc">|</span> </span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"New York, NY"</span>, </span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>         year <span class="sc">==</span> <span class="dv">1992</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 7
   area_name    STCOU item_id    population  year survey_code state
@@ -1305,8 +1312,11 @@ $noncounty_data
 <span id="cb79-12"><a href="#cb79-12" aria-hidden="true" tabindex="-1"></a>                                       <span class="sc">&amp;</span> year <span class="sc">==</span> <span class="dv">1992</span> <span class="sc">&amp;</span> population <span class="sc">==</span> <span class="dv">0</span>, </span>
 <span id="cb79-13"><a href="#cb79-13" aria-hidden="true" tabindex="-1"></a>                                       <span class="dv">1485877</span>, population)))))</span>
 <span id="cb79-14"><a href="#cb79-14" aria-hidden="true" tabindex="-1"></a>combined_census_lists_PST_modified[[<span class="dv">1</span>]] <span class="sc">|&gt;</span> </span>
-<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(area_name <span class="sc">==</span> <span class="st">"Kings, NY"</span> <span class="sc">|</span> area_name <span class="sc">==</span> <span class="st">"Queens, NY"</span> <span class="sc">|</span> </span>
-<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Bronx, NY"</span> <span class="sc">|</span> area_name <span class="sc">==</span> <span class="st">"New York, NY"</span>, year <span class="sc">==</span> <span class="dv">1992</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(area_name <span class="sc">==</span> <span class="st">"Kings, NY"</span> <span class="sc">|</span> </span>
+<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Queens, NY"</span> <span class="sc">|</span> </span>
+<span id="cb79-17"><a href="#cb79-17" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"Bronx, NY"</span> <span class="sc">|</span> </span>
+<span id="cb79-18"><a href="#cb79-18" aria-hidden="true" tabindex="-1"></a>           area_name <span class="sc">==</span> <span class="st">"New York, NY"</span>, </span>
+<span id="cb79-19"><a href="#cb79-19" aria-hidden="true" tabindex="-1"></a>         year <span class="sc">==</span> <span class="dv">1992</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 7
   area_name    STCOU item_id    population  year survey_code state
@@ -1321,7 +1331,8 @@ $noncounty_data
 <section id="county-plot-for-ny-top-10-with-outliers-replaced" class="level4">
 <h4 class="anchored" data-anchor-id="county-plot-for-ny-top-10-with-outliers-replaced">County Plot for NY, Top 10 with Outliers Replaced</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST_modified, <span class="at">var_name =</span> <span class="st">"population"</span>, <span class="at">select_state =</span> <span class="st">"NY"</span>, <span class="at">x=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_census_lists_PST_modified, </span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">var_name =</span> <span class="st">"population"</span>, <span class="at">select_state =</span> <span class="st">"NY"</span>, <span class="at">x =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

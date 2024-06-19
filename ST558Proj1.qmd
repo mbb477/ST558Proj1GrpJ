@@ -304,7 +304,8 @@ state.plot <- function(df, var_name = "enrollment") {
     summarize(mean_values = mean(get(var_name)), .groups = "drop")
   g <- ggplot(result, aes(x = year, y = mean_values, color = division)) +
     geom_line() +
-    labs (x = "Year", y = str_to_title(paste("mean", var_name)), color = "Division", 
+    labs (x = "Year", y = str_to_title(paste("mean", var_name)), 
+          color = "Division", 
           title = toTitleCase(paste("mean", var_name, "per year by division")))
   return(g)
 }
@@ -397,7 +398,8 @@ state.plot(combined_census_lists_EDU)
 Looking at the plot above, we see a decrease in enrollment in 1997 for the Middle Atlantic, so there may be an outlier. The data was filtered for 1997 and Middle Atlantic. We can see below that the enrollment for New Jersey is recorded as zero.
 
 ```{r}
-outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |> filter(year == 1997, division == "Middle Atlantic") 
+outlier_mid_atlantic <- combined_census_lists_EDU[[2]] |> 
+  filter(year == 1997, division == "Middle Atlantic") 
 outlier_mid_atlantic
 ```
 
@@ -428,13 +430,13 @@ Below, we plot county educational enrollment data for several different states u
 #### County Plot for NC, Top 20
 
 ```{r}
-plot.county(combined_census_lists_EDU, x=20)
+plot.county(combined_census_lists_EDU, x = 20)
 ```
 
 #### County Plot for SC, Bottom 7
 
 ```{r}
-plot.county(combined_census_lists_EDU, select_state = "SC", sort = "bottom", x=7)
+plot.county(combined_census_lists_EDU, select_state = "SC", sort = "bottom", x = 7)
 ```
 
 #### County plot with No Specifications (default only)
@@ -446,7 +448,7 @@ plot.county(combined_census_lists_EDU)
 #### County Plot for PA, Top 8
 
 ```{r}
-plot.county(combined_census_lists_EDU, select_state = "PA", sort="top", x=8)
+plot.county(combined_census_lists_EDU, select_state = "PA", sort="top", x = 8)
 ```
 
 ## PST Data Sets
@@ -527,13 +529,15 @@ Below, we plot county population data for several different states using differe
 #### County Plot for CA, Top 15
 
 ```{r}
-plot.county(combined_census_lists_PST, var_name = "population", select_state = "CA", x=15)
+plot.county(combined_census_lists_PST, var_name = "population", 
+            select_state = "CA", x = 15)
 ```
 
 #### County Plot for TX, Top 4
 
 ```{r}
-plot.county(combined_census_lists_PST, var_name = "population", select_state = "TX", x=4)
+plot.county(combined_census_lists_PST, var_name = "population", 
+            select_state = "TX", x = 4)
 ```
 
 #### County Plot with No Specifications (Default Only)
@@ -545,16 +549,19 @@ plot.county(combined_census_lists_PST, var_name = "population")
 #### County Plot for NY, Top 10
 
 ```{r}
-plot.county(combined_census_lists_PST, var_name = "population", select_state = "NY", x=10)
+plot.county(combined_census_lists_PST, var_name = "population", 
+            select_state = "NY", x = 10)
 ```
 
 It looks like there may be some outliers in this data. We will investigate by filtering data for the counties of Bronx, Kings, New York and Queens in 1992, although we can see visually that 3 of the counties are zero.
 
 ```{r}
 combined_census_lists_PST[[1]] |> 
-  filter(area_name == "Kings, NY" | area_name == "Queens, NY" | 
+  filter(area_name == "Kings, NY" | 
+           area_name == "Queens, NY" | 
            area_name == "Bronx, NY" | 
-           area_name == "New York, NY", year == 1992)
+           area_name == "New York, NY", 
+         year == 1992)
 ```
 
 We can see that the population for Kings, NY is unusually high, while Bronx, New York and Queens counties are zero. The correct populations can be found in this document, <https://www2.census.gov/programs-surveys/popest/tables/1990-2000/intercensal/st-co/co-est2001-12-36.pdf>. We will replace the incorrect data in the original list, verify our changes and rerun the county plot function.
@@ -574,13 +581,17 @@ combined_census_lists_PST_modified$county_data <-
                                        & year == 1992 & population == 0, 
                                        1485877, population)))))
 combined_census_lists_PST_modified[[1]] |> 
-  filter(area_name == "Kings, NY" | area_name == "Queens, NY" | 
-           area_name == "Bronx, NY" | area_name == "New York, NY", year == 1992)
+  filter(area_name == "Kings, NY" | 
+           area_name == "Queens, NY" | 
+           area_name == "Bronx, NY" | 
+           area_name == "New York, NY", 
+         year == 1992)
          
 ```
 
 #### County Plot for NY, Top 10 with Outliers Replaced
 
 ```{r}
-plot.county(combined_census_lists_PST_modified, var_name = "population", select_state = "NY", x=10)
+plot.county(combined_census_lists_PST_modified, 
+            var_name = "population", select_state = "NY", x = 10)
 ```
